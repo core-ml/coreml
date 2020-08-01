@@ -24,6 +24,7 @@ class BaseDataset(Dataset):
     """
     def __init__(self, dataset_config: List[DatasetConfigDict],
                  fraction: float = 1.0):
+        self._check_args(fraction)
         self.dataset_config = dataset_config
         self.load_items()
         self.load_fraction(fraction)
@@ -43,3 +44,8 @@ class BaseDataset(Dataset):
             random.shuffle(self.items)
 
             self.items = self.items[:final_num]
+
+    @staticmethod
+    def _check_args(fraction):
+        if fraction < 0 or fraction > 1:
+            raise ValueError("fraction should be within [0, 1]")
