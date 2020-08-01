@@ -1,6 +1,6 @@
 # CoreML
 
-Generic framework for ML-based projects.
+Generic framework for Machine Learning projects.
 
 ## Setup
 
