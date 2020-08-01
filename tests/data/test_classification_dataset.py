@@ -1,7 +1,10 @@
 """Tests coreml.data.classification.ClassificationDataset"""
 import unittest
+from os.path import join, exists
+import subprocess
 import torch
 import numpy as np
+from coreml.config import DATA_ROOT
 from coreml.data.classification import get_classification_dataset
 from coreml.data.vision.base import BaseImageDataset
 from coreml.data.transforms import DataProcessor, \
@@ -12,6 +15,11 @@ class ClassificationDatasetTestCase(unittest.TestCase):
     """Class to run tests on ClassificationDataset"""
     @classmethod
     def setUpClass(cls):
+        if not exists(join(DATA_ROOT, 'CIFAR10')):
+            subprocess.call(
+                'python /workspace/coreml/tasks/data/classification/CIFAR10.py',
+                shell=True)
+
         classes = np.arange(10).tolist()
         cls.target_transform = ClassificationAnnotationTransform(classes)
 
