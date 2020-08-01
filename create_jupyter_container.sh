@@ -20,7 +20,7 @@ NV_GPU=$gpu nvidia-docker run --rm -it \
 	--name "$gpu"_"$name" \
 	-p $port:$port \
 	-v /path/to/coreml/:/workspace/coreml \
-	-v /path/to/outputs/$user:/output \
+	-v /path/to/outputs/:/output \
 	-v /path/to/data:/data \
 	--env WANDB_DOCKER=$image \
 	--env WANDB_API_KEY=$WANDB_API_KEY \
