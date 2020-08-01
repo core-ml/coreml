@@ -16,7 +16,7 @@ predictions/
 *.npy
 *.json
 *.yml
-!configs/default*.yml
+!configs/defaults/
 images/
 labels/
 labelTxt/
