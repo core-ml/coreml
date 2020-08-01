@@ -7,7 +7,6 @@ from collections import defaultdict
 from typing import Any, Dict, Tuple, List
 from tqdm import tqdm
 import numpy as np
-import pandas as pd
 import torch
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
@@ -16,32 +15,30 @@ from sklearn.metrics import precision_recall_curve, accuracy_score,\
     recall_score, precision_score, roc_curve, roc_auc_score
 import matplotlib.pyplot as plt
 
-from cac.data.audio import AudioItem
-from cac.data.dataloader import get_dataloader
-from cac.models.base import Model
-from cac.utils.logger import color
-from cac.utils.io import save_pkl, load_pkl
-from cac.utils.metrics import ConfusionMatrix
-from cac.utils.metrics import factory as metric_factory
-from cac.models.utils import get_saved_checkpoint_path, logit
-from cac.utils.viz import fig2im, plot_lr_vs_loss, plot_classification_metric_curve
-from cac.utils.wandb import get_audios, get_images, get_indices, get_confusion_matrix
-from cac.utils.loss import loss_factory
-from cac.networks import factory as network_factory
-from cac.optimizer import optimizer_factory, scheduler_factory
-from evaluation.utils import _save_eval_data
+from coreml.data.dataloader import get_dataloader
+from coreml.models.base import Model
+from coreml.utils.logger import color
+from coreml.utils.io import save_pkl, load_pkl
+from coreml.utils.metrics import ConfusionMatrix
+from coreml.utils.metrics import factory as metric_factory
+from coreml.utils.viz import fig2im, plot_lr_vs_loss, \
+    plot_classification_metric_curve
+from coreml.utils.wandb import get_audios, get_images, get_indices, \
+    get_confusion_matrix
+from coreml.utils.loss import loss_factory
+from coreml.networks import factory as network_factory
+from coreml.optimizer import optimizer_factory, scheduler_factory
 np.set_printoptions(suppress=True)
 
 
-class ClassificationModel(Model):
+class BinaryClassificationModel(Model):
     """Classification model class
 
-    Args:
     :param config: Config object
     :type config: Config
     """
     def __init__(self, config):
-        super(ClassificationModel, self).__init__(config)
+        super(BinaryClassificationModel, self).__init__(config)
         logging.info(color('Using loss functions:'))
         logging.info(self.model_config.get('loss'))
 
@@ -135,72 +132,9 @@ class ClassificationModel(Model):
         epoch_data['items'] = np.hstack(epoch_data['items'])
         return epoch_data
 
-    def _aggregate_data(
-            self, epoch_data: dict, method: str,
-            at: str, classes: List[str] = None) -> Tuple:
-        """Aggregate predictions for a single file by a given `method`
-
-        :param epoch_data: dictionary containing lists of various epoch values
-        :type epoch_data: dict
-        :param method: method to be used for aggregation, eg. median
-        :type method: str
-        :param at: point of aggregating the predictions, eg. after softmax
-        :type at: str
-
-        :return: epoch data dictionary with values aggregated per file
-        """
-        items = epoch_data['items']
-        predictions, targets = epoch_data['predictions'], epoch_data['targets']
-
-        if classes is None:
-            classes = self.model_config['classes']
-
-        agg_items, agg_predictions, agg_targets = [], [], []
-
-        paths = np.array([item.path for item in items])
-        unique_paths = np.unique(paths)
-
-        if at == 'softmax':
-            predictions = F.softmax(predictions, -1)
-        else:
-            raise NotImplementedError
-
-        if len(classes) == 2:
-            # only works for binary classification as of now
-            predictions = predictions[:, 1]
-            indices = defaultdict()
-            for path in unique_paths:
-                indices = np.where(paths == path)[0]
-
-                file_items = items[indices]
-                starts = [item.start for item in file_items]
-                sorted_indices = indices[np.argsort(starts)]
-                file_item = AudioItem(path=path)
-                agg_items.append(file_item)
-
-                file_target = targets[sorted_indices][0]
-                agg_targets.append(file_target)
-
-                file_predictions = predictions[sorted_indices]
-                if method == 'median':
-                    file_prediction = np.median(file_predictions)
-                    inverse_softmax = torch.Tensor([0.0, logit(file_prediction)])
-                    agg_predictions.append(inverse_softmax)
-                else:
-                    raise NotImplementedError
-        else:
-            raise NotImplementedError
-
-        epoch_data['targets'] = torch.stack(agg_targets)
-        epoch_data['predictions'] = torch.stack(agg_predictions)
-        epoch_data['items'] = np.array(agg_items)
-
-        return epoch_data
-
     def update_network_params(self, losses):
         """Defines how to update network weights
 
-        Args:
         :param losses: losses for the current batch
         :type losses: dict
         """
@@ -242,7 +176,8 @@ class ClassificationModel(Model):
 
     def log_epoch_summary(self, mode: str, epoch_losses: dict, metrics: dict,
                           epoch_data: dict, learning_rates: List[Any],
-                          batch_losses: defaultdict, instance_losses: defaultdict,
+                          batch_losses: defaultdict,
+                          instance_losses: defaultdict,
                           use_wandb: bool):
         """Logs the summary of the epoch (losses, metrics and visualizations)
 
@@ -307,12 +242,6 @@ class ClassificationModel(Model):
 
         for key, value in metrics.items():
             instance_values[key] = value
-
-        starts = [item.start if hasattr(item, 'start') else None for item in epoch_data['items']]
-        ends = [item.end if hasattr(item, 'end') else None for item in epoch_data['items']]
-
-        instance_values['start'] = starts
-        instance_values['end'] = ends
 
         for loss_name in instance_losses:
             instance_values['instance_loss'] = instance_losses[loss_name]
@@ -379,13 +308,14 @@ class ClassificationModel(Model):
         :type targets: Any
         :param predictions: model predictions
         :type predictions: Any
-        :param threshold: confidence threshold to be used for binary classification; if None,
-            the optimal threshold is found.
+        :param threshold: confidence threshold to be used for binary
+            classification; if None, the optimal threshold is found.
         :type threshold: float, defaults to None
         :param recall: minimum recall to choose the optimal threshold
         :type recall: float, defaults to 0.9
-        :param as_logits: whether the predictions are logits; if as_logits=True, the values
-            are converted into softmax scores before further processing.
+        :param as_logits: whether the predictions are logits; if
+            as_logits=True, the values are converted into softmax scores
+            before further processing.
         :type as_logits: bool, defaults to True
         :param classes: list of classes in the target
         :type classes: List[str], defaults to None
@@ -394,7 +324,7 @@ class ClassificationModel(Model):
         """
         if as_logits:
             # convert to softmax scores from logits
-            predictions = F.softmax(predictions, -1)
+            predictions = torch.sigmoid(predictions)
 
         targets = targets.cpu()
         predict_proba = predictions.detach().cpu()
@@ -402,80 +332,64 @@ class ClassificationModel(Model):
         if classes is None:
             classes = self.model_config['classes']
 
-        if len(classes) == 2:
-            if len(predict_proba.shape) != 1:
-                if len(predict_proba.shape) == 2 and predict_proba.shape[1] == 2:
-                    predict_proba = predict_proba[:, 1]
+        if len(classes) != 2:
+            raise ValueError('More than 2 classes found')
 
-                else:
-                    raise ValueError('Acceptable shapes for predict_proba for \
-                        binary classification are (N,) and (N, 2). Got \
-                        {}'.format(predict_proba.shape))
+        if threshold is None:
+            logging.info('Finding optimal threshold based on: {}'.format(
+                self.model_config['eval']['maximize_metric']))
+            maximize_fn = metric_factory.create(
+                self.model_config['eval']['maximize_metric'],
+                **{'recall': recall})
+            _, _, threshold = maximize_fn(targets, predict_proba)
 
-            if threshold is None:
-                logging.info('Finding optimal threshold based on: {}'.format(
-                    self.model_config['eval']['maximize_metric']))
-                maximize_fn = metric_factory.create(
-                    self.model_config['eval']['maximize_metric'],
-                    **{'recall': recall})
-                _, _, threshold = maximize_fn(targets, predict_proba)
+        predicted_labels = torch.ge(predict_proba, threshold).cpu()
+        confusion_matrix = ConfusionMatrix(classes)
+        confusion_matrix(targets, predicted_labels)
 
-            predicted_labels = torch.ge(predict_proba, threshold).cpu()
-            confusion_matrix = ConfusionMatrix(classes)
-            confusion_matrix(targets, predicted_labels)
+        tp = confusion_matrix.tp
+        fp = confusion_matrix.fp
+        tn = confusion_matrix.tn
+        fp = confusion_matrix.fp
 
-            tp = confusion_matrix.tp
-            fp = confusion_matrix.fp
-            tn = confusion_matrix.tn
-            fp = confusion_matrix.fp
+        metrics = {
+            'accuracy': accuracy_score(targets, predicted_labels),
+            'confusion_matrix': confusion_matrix.cm,
+            'precision': precision_score(targets, predicted_labels),
+            'recall': recall_score(
+                targets, predicted_labels, zero_division=1),
+            'threshold': float(threshold),
+            'ppv': confusion_matrix.ppv,
+            'npv': confusion_matrix.npv,
+            'specificity': confusion_matrix.specificity,
+            'plr': confusion_matrix.plr,
+            'nlr': confusion_matrix.nlr,
+            'overall_accuracy': confusion_matrix.overall_accuracy
+        }
 
-            metrics = {
-                'accuracy': accuracy_score(targets, predicted_labels),
-                'confusion_matrix': confusion_matrix.cm,
-                'precision': precision_score(targets, predicted_labels),
-                'recall': recall_score(
-                    targets, predicted_labels, zero_division=1),
-                'threshold': float(threshold),
-                'ppv': confusion_matrix.ppv,
-                'npv': confusion_matrix.npv,
-                'specificity': confusion_matrix.specificity,
-                'plr': confusion_matrix.plr,
-                'nlr': confusion_matrix.nlr,
-                'overall_accuracy': confusion_matrix.overall_accuracy
-            }
+        precisions, recalls, thresholds = precision_recall_curve(
+            targets, predict_proba)
+        metrics['pr-curve'] = plot_classification_metric_curve(
+            recalls, precisions, xlabel='Recall',
+            ylabel='Precision')
+        plt.close()
 
-            precisions, recalls, thresholds = precision_recall_curve(
-                targets, predict_proba)
-            metrics['pr-curve'] = plot_classification_metric_curve(
-                recalls, precisions, xlabel='Recall',
-                ylabel='Precision')
-            plt.close()
+        fprs, tprs, _ = roc_curve(targets, predict_proba)
+        metrics['roc-curve'] = plot_classification_metric_curve(
+            fprs, tprs, xlabel='False Positive Rate',
+            ylabel='True Positive Rate')
+        plt.close()
 
-            fprs, tprs, _ = roc_curve(targets, predict_proba)
-            metrics['roc-curve'] = plot_classification_metric_curve(
-                fprs, tprs, xlabel='False Positive Rate',
-                ylabel='True Positive Rate')
-            plt.close()
-
-            if len(torch.unique(targets)) ==  1:
-                metrics['auc-roc'] = '-'
-            else:
-                metrics['auc-roc'] = roc_auc_score(targets, predict_proba)
-
-            specificities = np.array([1 - fpr for fpr in fprs])
-            metrics['ss-curve'] = plot_classification_metric_curve(
-                tprs, specificities, xlabel='Sensitivity',
-                ylabel='Specificity')
-            plt.close()
+        if len(torch.unique(targets)) == 1:
+            metrics['auc-roc'] = '-'
         else:
-            predicted_labels = torch.argmax(predict_proba, -1).cpu()
-            confusion_matrix = ConfusionMatrix(classes)
-            confusion_matrix(targets, predicted_labels)
+            metrics['auc-roc'] = roc_auc_score(targets, predict_proba)
 
-            metrics = {
-                'accuracy': accuracy_score(targets, predicted_labels),
-                'confusion_matrix': confusion_matrix.cm,
-            }
+        specificities = np.array([1 - fpr for fpr in fprs])
+        metrics['ss-curve'] = plot_classification_metric_curve(
+            tprs, specificities, xlabel='Sensitivity',
+            ylabel='Specificity')
+        plt.close()
 
         return metrics
 
@@ -515,7 +429,7 @@ class ClassificationModel(Model):
             load_dir = join(
                 self.config.paths['OUT_DIR'], load_config['version'],
                 'checkpoints')
-            self.load_path = get_saved_checkpoint_path(
+            self.load_path = self.checkpoint.get_saved_checkpoint_path(
                 load_dir, load_config['load_best'], load_config['epoch'])
 
             logging.info(color("=> Loading model weights from {}".format(
@@ -592,27 +506,11 @@ class ClassificationModel(Model):
         :param batch_losses: Dynamically accumulated losses per batch
         :type batch_losses: defaultdict, defaults to None
         """
-        super(ClassificationModel, self)._update_wandb(mode, epoch_losses, metrics)
+        super(BinaryClassificationModel, self)._update_wandb(
+            mode, epoch_losses, metrics)
 
         # decide indices to visualize
         indices = get_indices(epoch_data['targets'])
-
-        # log data summary only once at the first epoch
-        if not self.epoch_counter:
-            f, ax = plt.subplots(1)
-            ax.hist(epoch_data['targets'])
-            ax.set_xticks(np.unique(epoch_data['targets']))
-            wandb.log({
-                '{}/data_distribution'.format(mode): wandb.Image(fig2im(f))
-            }, step=self.epoch_counter)
-            plt.close()
-
-        # log audios
-        audios = get_audios(
-            epoch_data['items'][indices], F.softmax(
-                epoch_data['predictions'][indices], -1),
-            epoch_data['targets'][indices])
-        self.wandb_logs['{}/audios'.format(mode)] = audios
 
         # log learning rates vs losses
         if learning_rates is not None and batch_losses is not None:
@@ -621,17 +519,16 @@ class ClassificationModel(Model):
             self.wandb_logs['{}/lr-vs-loss'.format(mode)] = lr_vs_loss
             plt.close()
 
-        # log original inputs if they are not raw waveform
-        if not self.data_config['raw_waveform']:
-            input_images = get_images(
-                epoch_data['inputs'][indices].tolist(),
-                epoch_data['predictions'][indices],
-                epoch_data['targets'][indices])
-            self.wandb_logs['{}/inputs'.format(mode)] = input_images
+        # log original inputs
+        input_images = get_images(
+            epoch_data['inputs'][indices].tolist(),
+            epoch_data['predictions'][indices],
+            epoch_data['targets'][indices])
+        self.wandb_logs['{}/inputs'.format(mode)] = input_images
 
         self.wandb_logs['{}/confusion_matrix'.format(mode)] = wandb.Image(
-            get_confusion_matrix(metrics['confusion_matrix'],
-                                 self.model_config['classes']))
+            get_confusion_matrix(
+                metrics['confusion_matrix'], self.model_config['classes']))
 
         self.wandb_logs['{}/pr-curve'.format(mode)] = metrics['pr-curve']
         self.wandb_logs['{}/roc-curve'.format(mode)] = metrics['roc-curve']
@@ -640,85 +537,10 @@ class ClassificationModel(Model):
         # log to wandb
         wandb.log(self.wandb_logs, step=self.epoch_counter)
 
-    def evaluate(
-            self, data_loader: DataLoader, mode: str, use_wandb: bool = True,
-            ignore_cache: bool = True, threshold: float = None,
-            recall: float = 0.9, data_only: bool = False,
-            save: bool = True, log_summary: bool = True):
-        """Evaluate the model on given data
 
-        :param data_loader: data_loader made from the evaluation dataset
-        :type data_loader: DataLoader
-        :param mode: split of the data represented by the dataloader (train/test/val)
-        :type mode: str
-        :param use_wandb: flag to decide whether to log visualizations to wandb
-        :type use_wandb: bool, defaults to True
-        :param ignore_cache: whether to ignore cached values
-        :type ignore_cache: bool, defaults to True
-        :param threshold: confidence threshold to be used for binary
-            classification; if None, the optimal threshold is found.
-        :type threshold: float, defaults to None
-        :param recall: minimum recall to choose the optimal threshold
-        :type recall: float, defaults to 0.9
-        :param data_only: whether to only return the epoch data without
-            computing metrics
-        :type data_only: bool, defaults to False
-        :param save: whether to save eval data
-        :type save: bool, defaults to True
-        :param log_summary: whether to log epoch summary
-        :type log_summary: bool, defaults to True
-        """
-        ckpt_name = basename(self.load_path).split('.')[0]
-        cache_path = join(
-            self.config.output_dir, 'evaluation', ckpt_name, 'cache', '{}.pt'.format(mode))
-        makedirs(dirname(cache_path), exist_ok=True)
-
-        # load cache if `ignore_cache=False`
-        if exists(cache_path) and not ignore_cache:
-            logging.info(
-                color('Using cached values from {}'.format(cache_path), 'red'))
-            results = torch.load(cache_path)
-        else:
-            logging.info(color('Ignoring cache', 'red'))
-            # prevent logging anything into wandb when processing epoch
-            results = self.process_epoch(
-                data_loader, mode=mode, training=False, use_wandb=False,
-                log_summary=log_summary)
-
-            logging.info(
-                color('Saving cached values to {}'.format(cache_path), 'red'))
-            torch.save(results, cache_path)
-
-        if data_only:
-            return results
-
-        predictions = results['predictions']
-        targets = results['targets']
-
-        threshold = threshold if threshold is not None else results['threshold']
-
-        logging.info(color("Using threshold: {}".format(threshold)))
-        metrics = self.compute_epoch_metrics(
-            predictions, targets, threshold=threshold, recall=recall)
-        logging.info(metrics)
-
-        # save evaluation data
-        save_dir = join(self.config.output_dir, 'evaluation', ckpt_name)
-
-        # update wandb
-        if use_wandb:
-            self._update_wandb(mode, {}, metrics, results)
-
-        if save:
-            logging.info(color('Saving eval data', 'red'))
-            _save_eval_data(
-                save_dir, mode, results['items'], predictions, targets,
-                metrics)
-
-
-class ClassificationModelBuilder:
+class BinaryClassificationModelBuilder:
     def __init__(self):
         self._instance = None
 
     def __call__(self, **kwargs):
-        return ClassificationModel(**kwargs)
+        return BinaryClassificationModel(**kwargs)

@@ -1,4 +1,4 @@
-"""Holds util functions related to reading and writing various types of files"""
+"""Holds util functions for reading and writing various types of files"""
 # pylint: disable=invalid-name,no-member
 
 import pickle

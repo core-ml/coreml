@@ -12,11 +12,11 @@ from torch.utils.data import DataLoader
 import torch.backends.cudnn as cudnn
 import wandb
 
-from cac.utils.logger import color
-from cac.data.utils import read_dataset_from_config
-from cac.data.dataloader import get_dataloader
-from cac.callbacks import ModelCheckpoint
-from cac.models.utils import get_subsets
+from coreml.utils.logger import color
+from coreml.data.utils import read_dataset_from_config
+from coreml.data.dataloader import get_dataloader
+from coreml.callbacks import ModelCheckpoint
+from coreml.models.utils import get_subsets
 
 
 class Estimator(ABC):
@@ -92,9 +92,9 @@ class Model(Estimator):
         """Setup optimizers to be used while training"""
         pass
 
-    # def _setup_callbacks(self):
-    #     self.checkpoint = ModelCheckpoint(
-    #         self.config.checkpoint_dir, **self.config.model['save'])
+    def _setup_callbacks(self):
+        self.checkpoint = ModelCheckpoint(
+            self.config.checkpoint_dir, **self.config.model['save'])
 
     @abstractmethod
     def calculate_instance_loss(
