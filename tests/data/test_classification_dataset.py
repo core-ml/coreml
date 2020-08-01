@@ -58,6 +58,18 @@ class ClassificationDatasetTestCase(unittest.TestCase):
 
         self.assertTrue(len(test_dataset.items) != len(train_dataset.items))
 
+    def test_fraction(self):
+        """Test creating ClassificationDataset object using fraction < 1"""
+        dataset_config = {
+            'name': 'CIFAR10',
+            'version': 'default',
+            'mode': 'test'
+        }
+        fraction = 0.5
+        dataset = get_classification_dataset(BaseImageDataset)(
+            [dataset_config], fraction=fraction)
+        self.assertEqual(5000, len(dataset.items))
+
     def test_dataset_no_transform(self):
         """Checks dataset using no transform"""
         dataset = get_classification_dataset(BaseImageDataset)(

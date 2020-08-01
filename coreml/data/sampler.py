@@ -21,8 +21,11 @@ class DataSampler(Sampler):
     :type shuffle: bool, optional
     :param seed: random seed to use for sampling, defaults to 0
     :type seed: int, optional
+    :param kwargs: additional params as dict
+    :type kwargs: dict
     """
-    def __init__(self, dataset: Dataset, shuffle: bool = True, seed: int = 0):
+    def __init__(self, dataset: Dataset, shuffle: bool = True, seed: int = 0,
+                 **kwargs):
         super(DataSampler, self).__init__(dataset)
         self.dataset = dataset
         self.shuffle = shuffle
@@ -42,3 +45,7 @@ class DataSampler(Sampler):
 
     def __len__(self):
         return self.len
+
+
+sampler_factory = Factory()
+sampler_factory.register_builder('default', DataSampler)
