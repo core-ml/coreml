@@ -30,3 +30,6 @@ MNIST/
 _build/
 tasks/docker
 *.xls
+build/
+dist/
+coreml.egg-info/
