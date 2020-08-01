@@ -25,7 +25,7 @@ class Image:
 
         self.label = label
 
-    def read(
+    def load(
             self, mode: str = 'RGB', as_tensor: bool = False
             ) -> Union[np.ndarray, torch.Tensor]:
         """Read the image
@@ -43,4 +43,6 @@ class Image:
         if as_tensor:
             image = torch.FloatTensor(image)
 
-        return image
+        return {
+            'signal': image
+        }

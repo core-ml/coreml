@@ -58,6 +58,38 @@ class DataProcessorTestCase(unittest.TestCase):
 
         self.assertEqual(transformed_input.shape, (2, *target_size))
 
+    def test_transpose(self):
+        """Checks Transpose"""
+        dummy = torch.ones((10, 20))
+        config = [
+            {
+                'name': 'Transpose',
+                'params': {
+                    'dim0': 0,
+                    'dim1': 1
+                }
+            }
+        ]
+        processor = DataProcessor(config)
+
+        t_signal = processor(dummy)
+        self.assertEqual(t_signal.shape, (20, 10))
+
+    def test_permute(self):
+        """Checks Permute"""
+        dummy = torch.ones((10, 20, 3))
+        config = [
+            {
+                'name': 'Permute',
+                'params': {
+                    'order': [2, 0, 1]
+                }
+            }
+        ]
+        processor = DataProcessor(config)
+        t_signal = processor(dummy)
+        self.assertEqual(t_signal.shape, (3, 10, 20))
+
 
 if __name__ == "__main__":
     unittest.main()

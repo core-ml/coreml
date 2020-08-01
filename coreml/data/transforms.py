@@ -43,6 +43,35 @@ class Resize:
         return signal.squeeze()
 
 
+class Transpose:
+    """Interchange two specified axes in the input
+
+    :param dim0: first dimension to swap
+    :type dim0: float
+    :param dim1: second dimension to swap
+    :type dim1: float
+    """
+    def __init__(self, dim0: int, dim1: int):
+        self.dim0 = dim0
+        self.dim1 = dim1
+
+    def __call__(self, signal: torch.Tensor) -> torch.Tensor:
+        return signal.transpose(self.dim0, self.dim1)
+
+
+class Permute:
+    """Permute the axes order in the input
+
+    :param order: list containing the order after permutation
+    :type order: List
+    """
+    def __init__(self, order: List):
+        self.order = order
+
+    def __call__(self, signal: torch.Tensor) -> torch.Tensor:
+        return signal.permute(*self.order)
+
+
 class Compose:
     """Composes several transforms together to be applied on raw signal
 
@@ -83,6 +112,8 @@ class DataProcessor:
 transform_factory = Factory()
 transform_factory.register_builder('Compose', Compose)
 transform_factory.register_builder('Resize', Resize)
+transform_factory.register_builder('Transpose', Transpose)
+transform_factory.register_builder('Permute', Permute)
 
 
 class ClassificationAnnotationTransform:
@@ -94,14 +125,16 @@ class ClassificationAnnotationTransform:
     :type classes: List[str]
     """
     def __init__(self, classes: List[str]):
+        assert isinstance(classes, list)
         self.classes = classes
 
     def __call__(self, target:  List[str]) -> int:
         # find the intersection between target and self.classes
-        intersection = [_target for _target in target if _target in self.classes]
+        intersection = [
+            _target for _target in target if _target in self.classes]
 
-        # ensure that only one of the relevant classes is present in the target
-        # at max
+        # ensure that only one of the relevant classes is present
+        # in the target at max
         if len(intersection) > 1:
             raise ValueError(
                 'target contains more than 1 overlapping class with self.classes')

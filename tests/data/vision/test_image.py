@@ -19,13 +19,13 @@ class ImageTestCase(unittest.TestCase):
         self.image = Image(self.dummy_image_path)
 
     def test_image_numpy(self):
-        """Test default functionality of Image.read()"""
-        np_image = self.image.read()
+        """Test default functionality of Image.load()"""
+        np_image = self.image.load()['signal']
         self.assertIsInstance(np_image, np.ndarray)
 
     def test_image_tensor(self):
-        """Test Image.read() with as_tensor=True"""
-        tensor_image = self.image.read(as_tensor=True)
+        """Test Image.load() with as_tensor=True"""
+        tensor_image = self.image.load(as_tensor=True)['signal']
         self.assertIsInstance(tensor_image, torch.Tensor)
 
     def test_label_non_dict(self):
