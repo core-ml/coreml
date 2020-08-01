@@ -41,6 +41,6 @@ class Image:
         self.height, self.width = image.shape[:2]
 
         if as_tensor:
-            image = torch.Tensor(image)
+            image = torch.FloatTensor(image)
 
         return image
