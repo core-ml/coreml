@@ -41,9 +41,8 @@ for index in tqdm(range(len(all_images)), desc='Saving images'):
     image_paths.append(image_path)
     cv2.imwrite(image_path, image[:, :, ::-1])
 
-
 splits = ['train'] * len(train.data) + ['test'] * len(test.data)
-labels = [{'classification': [all_targets[index]]} for index in range(len(all_targets))]
+labels = [{'classification': [all_targets[index].tolist()]} for index in range(len(all_targets))]
 
 annotation = pd.DataFrame({'path': image_paths, 'label': labels, 'split': splits})
 
@@ -56,18 +55,24 @@ version = {}
 # train split
 version['train'] = {
     'file': image_paths[:len(train.data)],
-    'label': all_targets[:len(train.data)]
+    'label': labels[:len(train.data)]
 }
 
 # test split
 version['test'] = {
     'file': image_paths[len(train.data):],
-    'label': all_targets[len(train.data):]
+    'label': labels[len(train.data):]
 }
 
 # check shapes
 assert len(version['train']['file']) == 50000
 assert len(version['test']['file']) == 10000
+
+# check label types
+assert isinstance(version['train']['label'], list)
+assert isinstance(version['train']['label'][0], dict)
+assert isinstance(version['test']['label'], list)
+assert isinstance(version['test']['label'][0], dict)
 
 # save the version file
 print(f'Saving version file to {version_path}')
