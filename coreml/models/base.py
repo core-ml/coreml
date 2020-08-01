@@ -68,14 +68,14 @@ class Model(Estimator):
         # maintains a count of the epoch
         self.epoch_counter = 0
 
+        # define callbacks
+        self._setup_callbacks()
+
         # loads the network and optimizer states based on config
         self.load(self.model_config['load'])
 
         # freeze layers based on config
         self._freeze_layers()
-
-        # define callbacks
-        # self._setup_callbacks()
 
     @abstractmethod
     def _setup_network(self):

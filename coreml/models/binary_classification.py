@@ -96,7 +96,7 @@ class BinaryClassificationModel(Model):
         loss_config = self.model_config.get('loss')[mode]
         criterion = loss_factory.create(
             loss_config['name'], **loss_config['params'])
-        loss = criterion(predictions, targets.long())
+        loss = criterion(predictions, targets)
 
         if as_numpy:
             loss = loss.cpu().numpy()
@@ -430,7 +430,7 @@ class BinaryClassificationModel(Model):
                 self.config.paths['OUT_DIR'], load_config['version'],
                 'checkpoints')
             self.load_path = self.checkpoint.get_saved_checkpoint_path(
-                load_dir, load_config['load_best'], load_config['epoch'])
+                load_config['load_best'], load_config['epoch'])
 
             logging.info(color("=> Loading model weights from {}".format(
                 self.load_path)))
@@ -480,7 +480,7 @@ class BinaryClassificationModel(Model):
 
         batch_data = {
             'inputs': inputs,
-            'predictions': predictions,
+            'predictions': predictions.squeeze(),
             'targets': labels,
             'items': batch['items']
         }
@@ -537,10 +537,32 @@ class BinaryClassificationModel(Model):
         # log to wandb
         wandb.log(self.wandb_logs, step=self.epoch_counter)
 
+    def evaluate(
+            self, data_loader: DataLoader, mode: str, use_wandb: bool = True,
+            ignore_cache: bool = True, threshold: float = None,
+            recall: float = 0.9, data_only: bool = False,
+            save: bool = True, log_summary: bool = True):
+        """Evaluate the model on given data
 
-class BinaryClassificationModelBuilder:
-    def __init__(self):
-        self._instance = None
-
-    def __call__(self, **kwargs):
-        return BinaryClassificationModel(**kwargs)
+        :param data_loader: data_loader made from the evaluation dataset
+        :type data_loader: DataLoader
+        :param mode: split of the data represented by the dataloader (train/test/val)
+        :type mode: str
+        :param use_wandb: flag to decide whether to log visualizations to wandb
+        :type use_wandb: bool, defaults to True
+        :param ignore_cache: whether to ignore cached values
+        :type ignore_cache: bool, defaults to True
+        :param threshold: confidence threshold to be used for binary
+            classification; if None, the optimal threshold is found.
+        :type threshold: float, defaults to None
+        :param recall: minimum recall to choose the optimal threshold
+        :type recall: float, defaults to 0.9
+        :param data_only: whether to only return the epoch data without
+            computing metrics
+        :type data_only: bool, defaults to False
+        :param save: whether to save eval data
+        :type save: bool, defaults to True
+        :param log_summary: whether to log epoch summary
+        :type log_summary: bool, defaults to True
+        """
+        pass

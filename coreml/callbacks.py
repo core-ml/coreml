@@ -60,7 +60,7 @@ class ModelCheckpoint(object):
             else:
                 fname = '{}_ckpt.pth.tar'.format(epoch)
 
-        return join(load_dir, fname)
+        return join(self.ckpt_dir, fname)
 
     def update_best_metric(
             self, epoch_counter: int, epoch_metric_dict: Dict) -> Dict:
