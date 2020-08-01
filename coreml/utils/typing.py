@@ -1,4 +1,5 @@
 import sys
+from typing import Any
 if sys.version_info >= (3, 8):
     from typing import TypedDict
 else:
@@ -46,3 +47,19 @@ class LayerConfigDict(TypedDict):
     define the layer.
     """
     name: dict
+
+
+class LabelDict(TypedDict):
+    """
+    Defines novel type for type-hinting label for an object
+
+    Each label is defined by a dict of the form: {
+        'task_name': `label_for_the_task`
+    }
+
+    where `task_name` is the name of the task corresponding to the label (like,
+    classification, detection, segmentation, etc.) and `label_for_the_task` can
+    be of any type suitable for the corresponding task - string for
+    classification, list of lists for detection, etc.
+    """
+    task_name: Any
