@@ -18,8 +18,8 @@ class BaseImageDataset(BaseDataset):
     Defines the base image dataset object that needs to be inherited
     by any task-specific dataset class for images.
 
-    :param dataset_config: defines the config for the data to be loaded. The config is
-        specified by a list of dicts, with each dict representing
+    :param dataset_config: defines the config for the data to be loaded.
+        The config is specified by a list of dicts, with each dict representing
         (dataset_name, dataset_version, mode [train, test, val])
     :type dataset_config: DatasetConfigDict
     :param fraction: fraction of the data to load, defaults to 1.0
