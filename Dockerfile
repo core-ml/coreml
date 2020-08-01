@@ -1,6 +1,6 @@
 # build the image required for setting up the repository
 # Example run: 
-# $ docker build -t dalmiaman/coreml:v1.0 .
+# $ docker build -t adalmia/coreml:v1.0 .
 
 # base image
 FROM nvcr.io/nvidia/pytorch:20.01-py3
