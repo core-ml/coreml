@@ -1,12 +1,21 @@
-"""Tests cac.data.dataloader.py"""
+"""Tests coreml.data.dataloader.py"""
+from os.path import join, exists
 import torch
 import numpy as np
 import unittest
+from coreml.config import DATA_ROOT
 from coreml.data.dataloader import get_dataloader
 
 
 class DataloaderTestCase(unittest.TestCase):
     """Class to check the creation of DataLoader"""
+    @classmethod
+    def setUpClass(cls):
+        if not exists(join(DATA_ROOT, 'CIFAR10')):
+            subprocess.call(
+                'python /workspace/coreml/tasks/data/classification/CIFAR10.py',
+                shell=True)
+
     def test_classification_dataloader_2d(self):
         """Test get_dataloader for classification with each input being 2D"""
         cfg = {

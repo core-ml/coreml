@@ -1,4 +1,4 @@
-"""Tests cac.data.transforms.DataProcessor"""
+"""Tests coreml.data.transforms.DataProcessor"""
 import unittest
 import math
 import numpy as np
