@@ -1,4 +1,4 @@
-"""Tests pestdetection.data.image.Image"""
+"""Tests coreml.data.vision.image.Image"""
 import unittest
 from os.path import join
 import torch
