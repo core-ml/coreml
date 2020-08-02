@@ -209,7 +209,7 @@ class RandomHorizontalFlip(RandomFlip):
     """
     def __init__(
             self, p: float = 0.5):
-        super(RandomVerticalFlip, self).__init__(
+        super(RandomHorizontalFlip, self).__init__(
             kornia.augmentation.RandomHorizontalFlip, p)
 
 
