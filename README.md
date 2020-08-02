@@ -75,6 +75,48 @@ Use the following command to launch a container:
 $ bash create_container.sh
 ```
 
+## Quickstart
+### CIFAR10
+- Download and prepare the data
+```
+$ python tasks/data/classification/CIFAR.py
+```
+
+This will create a folder named `CIFAR10` under the directory mounted at `/data` on your container along with default data versions and the required directory structure.
+
+- Since the codebase only supports binary classification for now, the step above also creates a `binary.yml` data version which converts the 10-class problem into a binary classification problem.
+
+- Run training using the default config:
+```
+$ python training/train.py --wandb -v configs/defaults/binary-cifar-classification.yml
+```
+
+The flag `--wandb` is used to ignore using `wandb` for this run. You can view other flags that can be passed using `-h`:
+```
+root@ip:/workspace/coreml# python training/train.py -h
+usage: train.py [-h] -v VERSION [-n NUM_WORKERS] [--debug] [-o] [--resume]
+                [--id ID] [--wandb] [-e ENTITY] [-p PROJECT] [--seed SEED]
+
+Trains a model
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v VERSION, --version VERSION
+                        path to the experiment config file
+  -n NUM_WORKERS, --num_workers NUM_WORKERS
+                        number of CPU workers to use
+  --debug               specify where a debugging run
+  -o, --overfit-batch   specify whether the run is to test overfitting
+  --resume              whether to resume experiment in wandb
+  --id ID               experiment ID in wandb
+  --wandb               whether to ignore using wandb
+  -e ENTITY, --entity ENTITY
+                        wandb user/org name
+  -p PROJECT, --project PROJECT
+                        wandb project name
+  --seed SEED           seed for the experiment
+```
+
 ## Testing
 We use `unittest` for all our tests. Simply run the following inside the Docker container:
 ```
@@ -87,8 +129,6 @@ $ python -m unittest discover tests
 - Support for multi-class classification
 - Add benchmarks for multiple datasets
 - Add documentation for using new datasets and configuring different parts of the pipeline
-
-
 
 ## Authors
 - [Aman Dalmia](https://github.com/dalmia)
