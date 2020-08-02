@@ -22,12 +22,9 @@ class ConfusionMatrix(Metric):
 
     :param classes: list of classes
     :type classes: List[Any]
-    :param prevalence: prevalence in the case of disease
-    :type prevalence: float, defaults to 0.02.
     """
-    def __init__(self, classes: List[Any], prevalence=0.02):
+    def __init__(self, classes: List[Any]):
         self.classes = classes
-        self.prevalence = prevalence
 
     def __call__(
             self, y_true: np.ndarray, y_pred: np.ndarray
@@ -92,72 +89,6 @@ class ConfusionMatrix(Metric):
         epsilon = np.finfo(float).eps
         specificity = (self.tn + epsilon) / (self.tn + self.fp + epsilon)
         return np.round(specificity, 4)
-
-    @property
-    def overall_accuracy(self):
-        """Returns the overall_accuracy"""
-        if not hasattr(self, 'cm'):
-            raise ValueError('confusion matrix has not been computed yet.')
-        if len(self.classes) != 2:
-            raise ValueError('overall_accuracy is only valid for 2 classes')
-        epsilon = np.finfo(float).eps
-        overall_accuracy = self.sensitivity * self.prevalence + \
-            self.specificity * (1 - self.prevalence)
-        return np.round(overall_accuracy, 4)
-
-    @property
-    def ppv(self):
-        """Returns the positive predictive value"""
-        if not hasattr(self, 'cm'):
-            raise ValueError('confusion matrix has not been computed yet.')
-        if len(self.classes) != 2:
-            raise ValueError('PPV is only valid for 2 classes')
-        epsilon = np.finfo(float).eps
-        numerator = self.sensitivity * self.prevalence
-        denominator = self.sensitivity * self.prevalence + \
-            (1 - self.specificity) * (1 - self.prevalence)
-        ppv = (numerator + epsilon) / (denominator + epsilon)
-        return np.round(ppv, 4)
-
-    @property
-    def npv(self):
-        """Returns the negative predictive value"""
-        if not hasattr(self, 'cm'):
-            raise ValueError('confusion matrix has not been computed yet.')
-        if len(self.classes) != 2:
-            raise ValueError('NPV is only valid for 2 classes')
-        epsilon = np.finfo(float).eps
-        numerator = self.specificity * (1 - self.prevalence)
-        denominator = (1 - self.sensitivity) * self.prevalence + \
-            self.specificity * (1 - self.prevalence)
-        npv = (numerator + epsilon) / (denominator + epsilon)
-        return np.round(npv, 4)
-
-    @property
-    def plr(self):
-        """Returns the positive likelihood ratio"""
-        if not hasattr(self, 'cm'):
-            raise ValueError('confusion matrix has not been computed yet.')
-        if len(self.classes) != 2:
-            raise ValueError('PLR is only valid for 2 classes')
-        epsilon = np.finfo(float).eps
-        numerator = self.sensitivity
-        denominator = 1 - self.specificity
-        plr = (numerator + epsilon) / (denominator + epsilon)
-        return np.round(plr, 4)
-
-    @property
-    def nlr(self):
-        """Returns the negative likelihood ratio"""
-        if not hasattr(self, 'cm'):
-            raise ValueError('confusion matrix has not been computed yet.')
-        if len(self.classes) != 2:
-            raise ValueError('NLR is only valid for 2 classes')
-        epsilon = np.finfo(float).eps
-        numerator = 1 - self.sensitivity
-        denominator = self.specificity
-        nlr = (numerator + epsilon) / (denominator + epsilon)
-        return np.round(nlr, 4)
 
 
 class PrecisionAtRecall(Metric):

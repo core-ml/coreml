@@ -130,36 +130,6 @@ class ConfusionMatrixTestCase(unittest.TestCase):
         cm(self.y_true, self.y_pred)
         self.assertEqual(cm.specificity, 0.6)
 
-    def test_plr(self):
-        """Checks PLR in the usual case"""
-        cm = ConfusionMatrix([0, 1])
-        cm(self.y_true, self.y_pred)
-        self.assertEqual(cm.plr, 1.0)
-
-    def test_nlr(self):
-        """Checks NLR in the usual case"""
-        cm = ConfusionMatrix([0, 1])
-        cm(self.y_true, self.y_pred)
-        self.assertEqual(cm.nlr, 1.0)
-
-    def test_ppv(self):
-        """Checks PPV in the usual case"""
-        cm = ConfusionMatrix([0, 1])
-        cm(self.y_true, self.y_pred)
-        self.assertEqual(cm.ppv, 0.02)
-
-    def test_npv(self):
-        """Checks NPV in the usual case"""
-        cm = ConfusionMatrix([0, 1])
-        cm(self.y_true, self.y_pred)
-        self.assertEqual(cm.npv, 0.98)
-
-    def test_overall_accuracy(self):
-        """Checks overall accuracy in the usual case"""
-        cm = ConfusionMatrix([0, 1])
-        cm(self.y_true, self.y_pred)
-        self.assertEqual(cm.overall_accuracy, 0.596)
-
     def test_tp_before_cm(self):
         """Checks calling tp before computing confusion matrix"""
         cm = ConfusionMatrix([0, 1])

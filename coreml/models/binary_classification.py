@@ -359,12 +359,7 @@ class BinaryClassificationModel(Model):
             'recall': recall_score(
                 targets, predicted_labels, zero_division=1),
             'threshold': float(threshold),
-            'ppv': confusion_matrix.ppv,
-            'npv': confusion_matrix.npv,
-            'specificity': confusion_matrix.specificity,
-            'plr': confusion_matrix.plr,
-            'nlr': confusion_matrix.nlr,
-            'overall_accuracy': confusion_matrix.overall_accuracy
+            'specificity': confusion_matrix.specificity
         }
 
         precisions, recalls, thresholds = precision_recall_curve(
