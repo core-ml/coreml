@@ -98,7 +98,8 @@ def get_dataloader(
     sampler_params = sampler_cfg.get('params', {})
     sampler_params.update({
         'dataset': dataset,
-        'shuffle': shuffle
+        'shuffle': shuffle,
+        'target_transform': target_transform
     })
     sampler = sampler_factory.create(sampler_cfg['name'], **sampler_params)
 

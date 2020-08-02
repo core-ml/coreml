@@ -75,10 +75,11 @@ class ClassificationDataSampler(DataSampler):
         self.mode = mode
 
         if mode == 'balanced':
-            self.target_transform = target_transform
-            labels = [item.label['classification'] for item in dataset.items]
-            self.labels = np.array([target_transform(
-                label) for label in labels])
+            self.labels = [
+                item.label['classification'] for item in dataset.items]
+            if target_transform is not None:
+                self.labels = np.array([target_transform(
+                    label) for label in self.labels])
 
             _, indices = np.unique(self.labels, return_inverse=True)
 
@@ -123,7 +124,8 @@ class ClassificationDataSampler(DataSampler):
             return
 
         assert isinstance(dataset.items[0].label, dict)
-        assert hasattr(target_transform, 'classes')
+        if target_transform is not None:
+            assert hasattr(target_transform, 'classes')
 
 
 sampler_factory = Factory()
