@@ -5,8 +5,8 @@
 - [Features](#features)
 - [Setup](#setup)
 - [Testing](#testing)
-- [Authors](#authors)
 - [TODOs](#todos)
+- [Authors](#authors)
 
 ## Features
 - Support for end-to-end training using `PyTorch`.
