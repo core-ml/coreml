@@ -129,6 +129,89 @@ class DataProcessorTestCase(unittest.TestCase):
         target = torch.tensor([[0.0, 0.3, 0.4], [0.1, 0.2, 0.1]]).T
         assert_array_almost_equal(target, t_dummy)
 
+    def test_random_vertical_flip_2d(self):
+        """Tests RandomVerticalFlip on 2D input"""
+        dummy = torch.tensor([[0., 0., 0.],
+                              [0., 0., 0.],
+                              [0., 1., 1.]])  # 3 x 3
+        expected = torch.tensor([[0., 1., 1.],
+                                 [0., 0., 0.],
+                                 [0., 0., 0.]])  # 3 x 3
+
+        config = [
+            {
+                'name': 'RandomVerticalFlip',
+                'params': {
+                    'p': 1.
+                }
+            }
+        ]
+        processor = DataProcessor(config)
+
+        t_dummy = processor(dummy)
+        assert_array_almost_equal(t_dummy, expected)
+
+        config = [
+            {
+                'name': 'RandomVerticalFlip',
+                'params': {
+                    'p': 0.
+                }
+            }
+        ]
+        processor = DataProcessor(config)
+
+        t_dummy = processor(dummy)
+        assert_array_almost_equal(dummy, t_dummy)
+
+    def test_random_vertical_flip_3d_1_channel(self):
+        """Tests RandomVerticalFlip on 3D input with 1 channel"""
+        dummy = torch.tensor([[0., 0., 0.],
+                              [0., 0., 0.],
+                              [0., 1., 1.]])     # 3 x 3
+        dummy = dummy.unsqueeze(0)               # 1 x 3 x 3
+        expected = torch.tensor([[0., 1., 1.],
+                                 [0., 0., 0.],
+                                 [0., 0., 0.]])  # 3 x 3
+        expected = expected.unsqueeze(0)         # 1 x 3 x 3
+
+        config = [
+            {
+                'name': 'RandomVerticalFlip',
+                'params': {
+                    'p': 1.
+                }
+            }
+        ]
+        processor = DataProcessor(config)
+
+        t_dummy = processor(dummy)
+        assert_array_almost_equal(t_dummy, expected)
+
+    def test_random_vertical_flip_3d_2_channels(self):
+        """Tests RandomVerticalFlip on 3D input with 2 channels"""
+        dummy = torch.tensor([[0., 0., 0.],
+                              [0., 0., 0.],
+                              [0., 1., 1.]])           # 3 x 3
+        dummy = dummy.unsqueeze(0).expand(2, -1, -1)   # 2 x 3 x 3
+        expected = torch.tensor([[0., 1., 1.],
+                                 [0., 0., 0.],
+                                 [0., 0., 0.]])             # 3 x 3
+        expected = expected.unsqueeze(0).expand(2, -1, -1)  # 2 x 3 x 3
+
+        config = [
+            {
+                'name': 'RandomVerticalFlip',
+                'params': {
+                    'p': 1.
+                }
+            }
+        ]
+        processor = DataProcessor(config)
+
+        t_dummy = processor(dummy)
+        assert_array_almost_equal(t_dummy, expected)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,7 @@
 from typing import List, Any, Union, Tuple
 import torch
 import torch.nn.functional as F
+import kornia
 from coreml.factory import Factory
 from coreml.utils.typing import TransformDict
 
@@ -149,12 +150,51 @@ class DataProcessor:
         return self.transform(signal)
 
 
+class RandomVerticalFlip:
+    """Randomly flips the input along the vertical axis
+
+    :param p: probability of the input being flipped; defaults to 0.5
+    :type p: float
+    """
+    def __init__(self, p: float = 0.5):
+        self.transform = kornia.augmentation.RandomVerticalFlip(p=p)
+
+    def __call__(self, signal: torch.Tensor) -> torch.Tensor:
+        self._check_input(signal)
+        ndim = len(signal.shape)
+
+        # B, C, H, W
+        signal = self.transform(signal)
+        signal = signal.squeeze()
+
+        if ndim == 2:
+            # signal is 2-dimensional
+            return signal
+
+        # ndim = 3
+        if len(signal.shape) == 2:
+            # input signal had 1 as its channel dimension
+            # which got removed due to squeeze()
+            signal = signal.unsqueeze(0)
+
+        return signal
+
+    @staticmethod
+    def _check_input(signal):
+        assert isinstance(signal, torch.Tensor)
+        assert len(signal.shape) in [2, 3]
+
+
 transform_factory = Factory()
 transform_factory.register_builder('Compose', Compose)
 transform_factory.register_builder('Resize', Resize)
 transform_factory.register_builder('Transpose', Transpose)
 transform_factory.register_builder('Permute', Permute)
 transform_factory.register_builder('SubtractMean', SubtractMean)
+transform_factory.register_builder('RandomVerticalFlip', RandomVerticalFlip)
+# transform_factory.register_builder(
+#     'RandomHorizontalFlip', RandomHorizontalFlip)
+# transform_factory.register_builder('RandomErasing', RandomErasing)
 
 
 class ClassificationAnnotationTransform:
