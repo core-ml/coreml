@@ -5,6 +5,8 @@
 - [Features](#features)
 - [Setup](#setup)
 - [Quickstart](#quickstart)
+  - [Setting optimization parameters](#setting-optimization-parameters)
+  - [Changing network architectures](#changing-network-architectures)
 - [How-Tos](#how-tos)
 - [Testing](#testing)
 - [TODOs](#todos)
@@ -172,6 +174,83 @@ Similarly, we support multiple learning rate schedulers defined in PyTorch along
 - `MultiStepLR`
 
 We also parameterize the loss function to be used and allow for different loss functions for training and validation. The need for making them different could arise in various situations. One such example is applying label smoothing during training but not during validation.
+
+### Changing network architectures
+The network architecture can be completely defined in the config itself:
+```yaml
+network:
+    name: neural_net
+    params:
+        config:
+        - name: Conv2d
+          params:
+            in_channels: 3
+            out_channels: 64
+            kernel_size: 3
+        - name: BatchNorm2d
+          params:
+            num_features: 64
+        - name: ReLU
+          params: {}
+        - name: Conv2d
+          params:
+            in_channels: 64
+            out_channels: 64
+            kernel_size: 3
+        - name: BatchNorm2d
+          params:
+            num_features: 64
+        - name: ReLU
+          params: {}
+        - name: AdaptiveAvgPool2d
+          params:
+            output_size:
+            - 1
+            - 1
+        - name: Flatten
+          params: {}
+        - name: Linear
+          params:
+            in_features: 64
+            out_features: 64
+        - name: ReLU
+          params: {}
+        - name: Linear
+          params:
+            in_features: 64
+            out_features: 1
+```
+The `config` key takes as input a list of dictionaries, with each dictionary specifying a layer or a backbone network. Yes, if you want to use a pretrained ResNet, you can simply plug it in as a backbone layer:
+
+```yaml
+network:
+    name: neural_net
+    params:
+        config:
+        - name: resnet50
+          params:
+            pretrained: true
+            in_channels: 3
+        - name: AdaptiveAvgPool2d
+          params:
+            output_size:
+            - 1
+            - 1
+        - name: Flatten
+          params: {}
+        - name: Linear
+          params:
+            in_features: 2048
+            out_features: 1
+```
+Currently, we support a lot of backbones:
+- `Resnet` variations: `resnet18`, `resnet34`, `resnet50`, `resnet101`, `resnet152`, `resnext50_32x4d`, `resnext101_32x8d`
+- `VGGNet` variations: `vgg11`, `vgg11_bn`, `vgg13`, `vgg13_bn`, `vgg16`, `vgg16_bn`, `vgg19_bn`, `vgg19`
+-  `EfficientNet` variations: `efficientnet-b0`, `efficientnet-b4`, `efficientnet-b7`
+
+The implementations for the `Resnet` and `VGGNet` based backbones have been taken from `torchvision.models` and those based on `EfficientNet` are supported by [this](https://github.com/lukemelas/EfficientNet-PyTorch/tree/master/efficientnet_pytorch) PyTorch implementation.
+
+Support for other backbones can be similarly added to `coreml/networks/backbone`.
 
 ## Testing
 We use `unittest` for all our tests. Simply run the following inside the Docker container:
