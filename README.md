@@ -74,3 +74,5 @@ We use `unittest` for all our tests. Simply run the following inside the Docker 
 ```
 $ python -m unittest discover tests
 ```
+## Authors
+- [Aman Dalmia](https://github.com/dalmia)
