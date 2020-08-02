@@ -5,9 +5,11 @@
 - [Features](#features)
 - [Setup](#setup)
 - [Quickstart](#quickstart)
-  - [Setting optimization parameters](#setting-optimization-parameters)
-  - [Changing network architectures](#changing-network-architectures)
 - [How-Tos](#how-tos)
+  - [Optimization](#optimization)
+  - [Network architecture](#network-architectures)
+  - [Dataset](#dataset-config)
+  - [Preprocessing](#preprocessing)
 - [Testing](#testing)
 - [TODOs](#todos)
 - [Authors](#authors)
@@ -251,6 +253,32 @@ Currently, we support a lot of backbones:
 The implementations for the `Resnet` and `VGGNet` based backbones have been taken from `torchvision.models` and those based on `EfficientNet` are supported by [this](https://github.com/lukemelas/EfficientNet-PyTorch/tree/master/efficientnet_pytorch) PyTorch implementation.
 
 Support for other backbones can be similarly added to `coreml/networks/backbone`.
+
+### Dataset
+The datasets to use can be specified as follows:
+```yaml
+dataset:
+    name: classification_dataset
+    config:
+      - name: CIFAR10
+        version: binary
+    params: {}
+```
+Here, `name` is used to decide which `torch.utils.data.Dataset` object to use, as defined in `coreml/data/__init__.py`. `config` takes a list of dataset configs. Each dataset config is a dictionary with `name` as the name of the dataset folder under `/data` and `version` being the specific dataset version to use, present in `/data/{name}/processed/versions`. `params` contains additional arguments that can be passed to the dataset object, as defined in `coreml/data`. When avlues are passed to `params`, they are specified for `train`/`val`/`test` separately:
+```yaml
+dataset:
+    name: classification_dataset
+    config:
+      - name: CIFAR10
+        version
+    params:
+      train:
+        fraction: 0.1
+      val:
+        fraction: 0.5
+```
+
+### Preprocessing
 
 ## Testing
 We use `unittest` for all our tests. Simply run the following inside the Docker container:
