@@ -61,7 +61,8 @@ class Config:
     def _set_defaults(params: Dict):
         """Validates parameter values"""
         # metrics
-        params['metrics_to_track'] = ['precision', 'specificity', 'recall']
+        params['metrics_to_track'] = [
+            'auc-roc', 'precision', 'specificity', 'recall']
         params['allow_val_change'] = params.get('allow_val_change', False)
 
         # sampler
