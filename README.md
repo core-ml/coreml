@@ -280,6 +280,40 @@ dataset:
 
 ### Preprocessing
 
+#### Input transform
+One the input is loaded, the pipeline for processing the input before it is fed into a batch, can be specified in the config as:
+```yaml
+signal_transform:
+    train:
+    - name: Permute
+      params:
+        order:
+          - 2
+          - 0
+          - 1
+    val:
+    - name: Permute
+      params:
+        order:
+          - 2
+          - 0
+          - 1
+```
+The pipeline for each split (`train`/`val`) is specified separately. For each split, a list of dictonaries are given. Each dictionary
+represents one transform, as defined in `coreml/data/transforms.py`, using the `name` of the transform and the arguments for that transform.
+
+#### Annotation transform
+The raw annotations might have to be transformed before processing as well. This is specified in the config as:
+```yaml
+target_transform:
+    name: classification
+    params:
+      classes:
+        - 0
+        - 1
+```
+The specific target transform is selected from `annotation_factory` inside `coreml/data/transforms.py`
+
 ## Testing
 We use `unittest` for all our tests. Simply run the following inside the Docker container:
 ```
