@@ -314,7 +314,7 @@ class BinaryClassificationModel(Model):
         :param recall: minimum recall to choose the optimal threshold
         :type recall: float, defaults to 0.9
         :param as_logits: whether the predictions are logits; if
-            as_logits=True, the values are converted into softmax scores
+            as_logits=True, the values are converted into sigmoid scores
             before further processing.
         :type as_logits: bool, defaults to True
         :param classes: list of classes in the target
@@ -323,7 +323,7 @@ class BinaryClassificationModel(Model):
         :return: dictionary of metrics as provided in the config file
         """
         if as_logits:
-            # convert to softmax scores from logits
+            # convert to sigmoid scores from logits
             predictions = torch.sigmoid(predictions)
 
         targets = targets.cpu()
