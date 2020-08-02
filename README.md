@@ -38,9 +38,9 @@ $ pip install wandb
 $ wandb login
 ```
 
-You will be redirected to a link that will show you your WANDB_API_KEY .
+You will be redirected to a link that will show you your `WANDB_API_KEY` .
 
-3. Set the WANDB_API_KEY by adding this to your ~/.bashrc file:
+3. Set the `WANDB_API_KEY` by adding this to your `~/.bashrc` file:
 ```bash
 export WANDB_API_KEY=YOUR_API_KEY
 ```
