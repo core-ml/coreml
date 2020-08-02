@@ -69,3 +69,8 @@ Use the following command to launch a container:
 $ bash create_container.sh
 ```
 
+## Testing
+We use `unittest` for all our tests. Simply run the following inside the Docker container:
+```
+$ python -m unittest discover tests
+```
