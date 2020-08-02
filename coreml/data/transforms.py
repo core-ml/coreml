@@ -150,18 +150,18 @@ class DataProcessor:
         return self.transform(signal)
 
 
-class RandomFlip:
-    """Randomly flips the input based on the flip class
+class KorniaBase:
+    """Base class to apply any kornia augmentation
 
-    :param flip_cls: kornia augmentation class for flipping
-    :type flip_cls: `kornia.augmentation.AugmentationBase`
-    :param p: probability of the input being flipped; defaults to 0.5
-    :type p: float
+    :param aug: kornia augmentation class to be used
+    :type aug: `kornia.augmentation.AugmentationBase`
+    :param kwargs: arguments for the given augmentation
+    :type kwargs: dict
     """
     def __init__(
             self, flip_cls: kornia.augmentation.AugmentationBase,
-            p: float = 0.5):
-        self.transform = flip_cls(p=p)
+            **kwargs):
+        self.transform = flip_cls(**kwargs)
 
     def __call__(self, signal: torch.Tensor) -> torch.Tensor:
         self._check_input(signal)
@@ -189,7 +189,7 @@ class RandomFlip:
         assert len(signal.shape) in [2, 3]
 
 
-class RandomVerticalFlip(RandomFlip):
+class RandomVerticalFlip(KorniaBase):
     """Randomly flips the input along the vertical axis
 
     :param p: probability of the input being flipped; defaults to 0.5
@@ -198,10 +198,10 @@ class RandomVerticalFlip(RandomFlip):
     def __init__(
             self, p: float = 0.5):
         super(RandomVerticalFlip, self).__init__(
-            kornia.augmentation.RandomVerticalFlip, p)
+            kornia.augmentation.RandomVerticalFlip, p=p)
 
 
-class RandomHorizontalFlip(RandomFlip):
+class RandomHorizontalFlip(KorniaBase):
     """Randomly flips the input along the horizontal axis
 
     :param p: probability of the input being flipped; defaults to 0.5
@@ -210,7 +210,33 @@ class RandomHorizontalFlip(RandomFlip):
     def __init__(
             self, p: float = 0.5):
         super(RandomHorizontalFlip, self).__init__(
-            kornia.augmentation.RandomHorizontalFlip, p)
+            kornia.augmentation.RandomHorizontalFlip, p=p)
+
+
+class RandomErasing(KorniaBase):
+    """
+    Erases a random selected rectangle for each image in the batch, putting the
+    value to zero. The rectangle will have an area equal to the original image
+    area multiplied by a value uniformly sampled between the range
+    [scale[0], scale[1]) and an aspect ratio sampled between
+    [ratio[0], ratio[1])
+
+    :param p: probability that the random erasing operation will be performed.
+        defaults to 0.5
+    :type p: float
+    :param scale: range of proportion of erased area against input image.
+        defaults to (0.02, 0.33)
+    :type scale: Tuple[float, float]
+    :param ratio: range of aspect ratio of erased area.
+        defaults to (0.3, 3.3)
+    :type ratio: Tuple[float, float]
+    """
+    def __init__(
+            self, p: float = 0.5, scale: Tuple[float, float] = (0.02, 0.33),
+            ratio: Tuple[float, float] = (0.3, 3.3)):
+        super(RandomErasing, self).__init__(
+            kornia.augmentation.RandomErasing, p=p,
+            scale=scale, ratio=ratio)
 
 
 transform_factory = Factory()
@@ -222,7 +248,7 @@ transform_factory.register_builder('SubtractMean', SubtractMean)
 transform_factory.register_builder('RandomVerticalFlip', RandomVerticalFlip)
 transform_factory.register_builder(
     'RandomHorizontalFlip', RandomHorizontalFlip)
-# transform_factory.register_builder('RandomErasing', RandomErasing)
+transform_factory.register_builder('RandomErasing', RandomErasing)
 
 
 class ClassificationAnnotationTransform:

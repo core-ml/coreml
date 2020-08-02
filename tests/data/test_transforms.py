@@ -295,6 +295,38 @@ class DataProcessorTestCase(unittest.TestCase):
         t_dummy = processor(dummy)
         assert_array_almost_equal(t_dummy, expected)
 
+    def test_random_erasing_2d(self):
+        """Tests RandomErasing on 2D input"""
+        dummy = torch.rand((3, 3))  # 3 x 3
+
+        config = [
+            {
+                'name': 'RandomErasing',
+                'params': {
+                    'p': 1.,
+                    'scale': (.001, .001),
+                    'ratio': (.2, .2)
+                }
+            }
+        ]
+        processor = DataProcessor(config)
+
+        t_dummy = processor(dummy)
+        self.assertEqual(t_dummy.shape, dummy.shape)
+
+        config = [
+            {
+                'name': 'RandomErasing',
+                'params': {
+                    'p': 0.
+                }
+            }
+        ]
+        processor = DataProcessor(config)
+
+        t_dummy = processor(dummy)
+        assert_array_almost_equal(dummy, t_dummy)
+
 
 if __name__ == "__main__":
     unittest.main()
