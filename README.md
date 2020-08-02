@@ -4,6 +4,7 @@
 
 - [Features](#features)
 - [Setup](#setup)
+- [Quickstart](#quickstart)
 - [Testing](#testing)
 - [TODOs](#todos)
 - [Authors](#authors)
