@@ -7,7 +7,7 @@
 - [Quickstart](#quickstart)
 - [How-Tos](#how-tos)
   - [Optimization](#optimization)
-  - [Network architecture](#network-architectures)
+  - [Network architectures](#network-architectures)
   - [Dataset](#dataset-config)
   - [Preprocessing](#preprocessing)
 - [Testing](#testing)
@@ -127,7 +127,7 @@ optional arguments:
 This section demonstrates the power of everything being parameterized by a config. Refer to `configs/defaults/binary-cifar-classification.yml`
 as the base config file on top of which we demonstrate the individual components.
 
-### Setting optimization parameters
+### Optimization
 
 ```yaml
 model:
@@ -177,7 +177,7 @@ Similarly, we support multiple learning rate schedulers defined in PyTorch along
 
 We also parameterize the loss function to be used and allow for different loss functions for training and validation. The need for making them different could arise in various situations. One such example is applying label smoothing during training but not during validation.
 
-### Changing network architectures
+### Network architectures
 The network architecture can be completely defined in the config itself:
 ```yaml
 network:
