@@ -72,6 +72,46 @@ class Permute:
         return signal.permute(*self.order)
 
 
+class SubtractMean:
+    """Subtract the specified mean value from the images
+
+    :param mean: mean value to be subtracted from each input;.
+    :type mean: Union[Tuple[int], Float[int], torch.Tensor]
+    :param dim: dimension along which the mean should be subtracted,
+        defaults to -1
+    :type dim: int
+    """
+    def __init__(self, mean: Union[Tuple[int], List[int], torch.Tensor],
+                 dim: int = -1):
+        mean, dim = self._check_params(mean, dim)
+        self.mean = mean
+        self.dim = dim
+
+    def __call__(self, signal: torch.Tensor) -> torch.Tensor:
+        """Apply the transformation
+
+        :param signal: signal to be augmented
+        :type signal: np.ndarray
+        :returns: mean-subtracted signal
+        """
+        self._check_input(signal)
+        signal = signal.transpose(self.dim, -1)
+        signal -= self.mean
+        return signal.transpose(self.dim, -1)
+
+    @staticmethod
+    def _check_params(mean, dim):
+        assert isinstance(mean, (list, tuple, torch.Tensor))
+        if not isinstance(mean, torch.Tensor):
+            mean = torch.FloatTensor(mean)
+        return mean, dim
+
+    def _check_input(self, signal):
+        assert isinstance(signal, torch.Tensor)
+        channels = signal.shape[self.dim]
+        assert channels == len(self.mean), "input does not match mean shape"
+
+
 class Compose:
     """Composes several transforms together to be applied on raw signal
 
@@ -114,6 +154,7 @@ transform_factory.register_builder('Compose', Compose)
 transform_factory.register_builder('Resize', Resize)
 transform_factory.register_builder('Transpose', Transpose)
 transform_factory.register_builder('Permute', Permute)
+transform_factory.register_builder('SubtractMean', SubtractMean)
 
 
 class ClassificationAnnotationTransform:

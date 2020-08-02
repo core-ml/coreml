@@ -90,6 +90,45 @@ class DataProcessorTestCase(unittest.TestCase):
         t_signal = processor(dummy)
         self.assertEqual(t_signal.shape, (3, 10, 20))
 
+    def test_subtract_mean_dims_aligned(self):
+        """Tests subtract mean dims already aligned"""
+        dummy = torch.tensor([[0.1, 0.5, 0.6], [0.2, 0.4, 0.3]])
+        mean = [0.1, 0.2, 0.2]
+
+        config = [
+            {
+                'name': 'SubtractMean',
+                'params': {
+                    'mean': mean
+                }
+            }
+        ]
+        processor = DataProcessor(config)
+
+        t_dummy = processor(dummy)
+        target = torch.tensor([[0.0, 0.3, 0.4], [0.1, 0.2, 0.1]])
+        assert_array_almost_equal(target, t_dummy)
+
+    def test_subtract_mean_align_dim(self):
+        """Tests subtract mean with dim specified"""
+        dummy = torch.tensor([[0.1, 0.5, 0.6], [0.2, 0.4, 0.3]]).T
+        mean = [0.1, 0.2, 0.2]
+
+        config = [
+            {
+                'name': 'SubtractMean',
+                'params': {
+                    'mean': mean,
+                    'dim': 0
+                }
+            }
+        ]
+        processor = DataProcessor(config)
+
+        t_dummy = processor(dummy)
+        target = torch.tensor([[0.0, 0.3, 0.4], [0.1, 0.2, 0.1]]).T
+        assert_array_almost_equal(target, t_dummy)
+
 
 if __name__ == "__main__":
     unittest.main()
