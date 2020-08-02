@@ -5,9 +5,11 @@ $ python evaluation/eval.py -v version
 import logging
 import argparse
 import os
-from os.path import join, dirname, splitext
+from os.path import join, dirname, splitext, basename
 import multiprocessing as mp
+import pandas as pd
 import wandb
+import torch
 from coreml.config import Config
 from coreml.data.dataloader import get_dataloader
 from coreml.models import factory as model_factory
@@ -37,7 +39,29 @@ def evaluate(config, mode, use_wandb, ignore_cache):
 
     # set to eval mode
     model.network.eval()
-    results = model.evaluate(dataloader, mode, use_wandb, ignore_cache)
+    results = model.evaluate(
+        dataloader, mode, use_wandb,
+        ignore_cache, data_only=True, log_summary=False)
+
+    # logits
+    predictions = results['predictions']
+
+    # convert to softmax
+    predictions = torch.sigmoid(predictions)
+
+    # get the file names
+    names = [splitext(basename(item.path))[0] for item in results['items']]
+
+    # convert to data frame
+    data_frame = pd.DataFrame({
+        'image_name': names, 'target': predictions.tolist()
+    })
+
+    # save the results
+    save_path = join(config.log_dir, 'evaluation', f'{mode}.csv')
+    os.makedirs(dirname(save_path), exist_ok=True)
+    logging.info(color(f'Saving results to {save_path}'))
+    data_frame.to_csv(save_path, index=False)
 
 
 def main(args):
@@ -93,6 +117,8 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--entity', type=str,
                         help='wandb user/org name')
     parser.add_argument('-p', '--project', type=str,
+                        help='wandb project name')
+    parser.add_argument('-o', '--output', type=str,
                         help='wandb project name')
     args = parser.parse_args()
     main(args)

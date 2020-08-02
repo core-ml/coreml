@@ -559,21 +559,10 @@ class BinaryClassificationModel(Model):
             '{}.pt'.format(mode))
         makedirs(dirname(cache_path), exist_ok=True)
 
-        # load cache if `ignore_cache=False`
-        if exists(cache_path) and not ignore_cache:
-            logging.info(
-                color('Using cached values from {}'.format(cache_path), 'red'))
-            results = torch.load(cache_path)
-        else:
-            logging.info(color('Ignoring cache', 'red'))
-            # prevent logging anything into wandb when processing epoch
-            results = self.process_epoch(
-                data_loader, mode=mode, training=False, use_wandb=False,
-                log_summary=log_summary)
-
-            logging.info(
-                color('Saving cached values to {}'.format(cache_path), 'red'))
-            torch.save(results, cache_path)
+        # prevent logging anything into wandb when processing epoch
+        results = self.process_epoch(
+            data_loader, mode=mode, training=False, use_wandb=False,
+            log_summary=log_summary)
 
         if data_only:
             return results

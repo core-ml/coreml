@@ -2,3 +2,4 @@
 - Label Smoothing
 - Augmentations
 - Patient-level aggregation or consistency
+- sampling for equal per batch
