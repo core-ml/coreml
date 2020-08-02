@@ -25,20 +25,22 @@ def main(args):
 
     set_logger(join(config.log_dir, 'train.log'))
     logging.info(args)
-    os.environ['WANDB_ENTITY'] = args.entity
-    os.environ['WANDB_PROJECT'] = args.project
-    os.environ['WANDB_DIR'] = dirname(config.checkpoint_dir)
 
-    run_name = args.version.replace('/', '_')
-    wandb.init(name=run_name, dir=dirname(config.checkpoint_dir),
-               notes=config.description, resume=args.resume,
-               id=args.id)
-    wandb.config.update(
-        config.__dict__,
-        allow_val_change=config.allow_val_change)
+    if args.wandb:
+        os.environ['WANDB_ENTITY'] = args.entity
+        os.environ['WANDB_PROJECT'] = args.project
+        os.environ['WANDB_DIR'] = dirname(config.checkpoint_dir)
+
+        run_name = args.version.replace('/', '_')
+        wandb.init(name=run_name, dir=dirname(config.checkpoint_dir),
+                   notes=config.description, resume=args.resume,
+                   id=args.id)
+        wandb.config.update(
+            config.__dict__,
+            allow_val_change=config.allow_val_change)
 
     config.num_workers = args.num_workers
-    train(config, args.debug, args.overfit_batch, args.no_wandb)
+    train(config, args.debug, args.overfit_batch, args.wandb)
 
 
 if __name__ == '__main__':
@@ -55,11 +57,11 @@ if __name__ == '__main__':
                         help='whether to resume experiment in wandb')
     parser.add_argument('--id', type=str, default=None,
                         help='experiment ID in wandb')
-    parser.add_argument('--no-wandb', action='store_false',
+    parser.add_argument('--wandb', action='store_false',
                         help='whether to ignore using wandb')
-    parser.add_argument('-e', '--entity', required=True,
+    parser.add_argument('-e', '--entity', type=str,
                         help='wandb user/org name')
-    parser.add_argument('-p', '--project', required=True,
+    parser.add_argument('-p', '--project', type=str,
                         help='wandb project name')
     parser.add_argument('--seed', type=int, default=42,
                         help='seed for the experiment')
