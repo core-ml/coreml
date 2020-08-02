@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="coreml",
-    version="0.0.1",
+    version="0.0.3",
     author="Aman Dalmia",
     author_email="amandalmia18@gmail.com",
     description="Generic Framework for ML projects",
