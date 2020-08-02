@@ -8,7 +8,7 @@
 - [How-Tos](#how-tos)
   - [Optimization](#optimization)
   - [Network architectures](#network-architectures)
-  - [Dataset](#dataset-config)
+  - [Datasets](#datasets)
   - [Preprocessing](#preprocessing)
 - [Testing](#testing)
 - [TODOs](#todos)
@@ -254,7 +254,7 @@ The implementations for the `Resnet` and `VGGNet` based backbones have been take
 
 Support for other backbones can be similarly added to `coreml/networks/backbone`.
 
-### Dataset
+### Datasets
 The datasets to use can be specified as follows:
 ```yaml
 dataset:
