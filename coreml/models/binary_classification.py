@@ -534,29 +534,22 @@ class BinaryClassificationModel(Model):
 
     def evaluate(
             self, data_loader: DataLoader, mode: str, use_wandb: bool = True,
-            ignore_cache: bool = True, threshold: float = None,
-            recall: float = 0.9, data_only: bool = False,
-            save: bool = True, log_summary: bool = True):
+            ignore_cache: bool = True, data_only: bool = False,
+            log_summary: bool = True):
         """Evaluate the model on given data
 
         :param data_loader: data_loader made from the evaluation dataset
         :type data_loader: DataLoader
-        :param mode: split of the data represented by the dataloader (train/test/val)
+        :param mode: split of the data represented by the dataloader
+            (train/test/val)
         :type mode: str
         :param use_wandb: flag to decide whether to log visualizations to wandb
         :type use_wandb: bool, defaults to True
         :param ignore_cache: whether to ignore cached values
         :type ignore_cache: bool, defaults to True
-        :param threshold: confidence threshold to be used for binary
-            classification; if None, the optimal threshold is found.
-        :type threshold: float, defaults to None
-        :param recall: minimum recall to choose the optimal threshold
-        :type recall: float, defaults to 0.9
         :param data_only: whether to only return the epoch data without
             computing metrics
         :type data_only: bool, defaults to False
-        :param save: whether to save eval data
-        :type save: bool, defaults to True
         :param log_summary: whether to log epoch summary
         :type log_summary: bool, defaults to True
         """
@@ -584,3 +577,7 @@ class BinaryClassificationModel(Model):
 
         if data_only:
             return results
+
+        # update wandb
+        if use_wandb:
+            self._update_wandb(mode, {}, results, results)
