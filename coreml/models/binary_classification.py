@@ -376,7 +376,7 @@ class BinaryClassificationModel(Model):
         plt.close()
 
         if len(torch.unique(targets)) == 1:
-            metrics['auc-roc'] = '-'
+            metrics['auc-roc'] = 0
         else:
             metrics['auc-roc'] = roc_auc_score(targets, predict_proba)
 

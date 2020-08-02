@@ -417,6 +417,8 @@ class Model(Estimator):
             if overfit_batch:
                 break
 
+            # break
+
         logging.info('Gathering data')
         epoch_data = self._gather_data(epoch_data)
 
