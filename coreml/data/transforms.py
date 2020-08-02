@@ -1,4 +1,4 @@
-from typing import List, Any, Union, Tuple
+from typing import List, Any, Union, Tuple, Callable
 import torch
 import torch.nn.functional as F
 import kornia
@@ -150,14 +150,18 @@ class DataProcessor:
         return self.transform(signal)
 
 
-class RandomVerticalFlip:
-    """Randomly flips the input along the vertical axis
+class RandomFlip:
+    """Randomly flips the input based on the flip class
 
+    :param flip_cls: kornia augmentation class for flipping
+    :type flip_cls: `kornia.augmentation.AugmentationBase`
     :param p: probability of the input being flipped; defaults to 0.5
     :type p: float
     """
-    def __init__(self, p: float = 0.5):
-        self.transform = kornia.augmentation.RandomVerticalFlip(p=p)
+    def __init__(
+            self, flip_cls: kornia.augmentation.AugmentationBase,
+            p: float = 0.5):
+        self.transform = flip_cls(p=p)
 
     def __call__(self, signal: torch.Tensor) -> torch.Tensor:
         self._check_input(signal)
@@ -185,6 +189,30 @@ class RandomVerticalFlip:
         assert len(signal.shape) in [2, 3]
 
 
+class RandomVerticalFlip(RandomFlip):
+    """Randomly flips the input along the vertical axis
+
+    :param p: probability of the input being flipped; defaults to 0.5
+    :type p: float
+    """
+    def __init__(
+            self, p: float = 0.5):
+        super(RandomVerticalFlip, self).__init__(
+            kornia.augmentation.RandomVerticalFlip, p)
+
+
+class RandomHorizontalFlip(RandomFlip):
+    """Randomly flips the input along the horizontal axis
+
+    :param p: probability of the input being flipped; defaults to 0.5
+    :type p: float
+    """
+    def __init__(
+            self, p: float = 0.5):
+        super(RandomVerticalFlip, self).__init__(
+            kornia.augmentation.RandomHorizontalFlip, p)
+
+
 transform_factory = Factory()
 transform_factory.register_builder('Compose', Compose)
 transform_factory.register_builder('Resize', Resize)
@@ -192,8 +220,8 @@ transform_factory.register_builder('Transpose', Transpose)
 transform_factory.register_builder('Permute', Permute)
 transform_factory.register_builder('SubtractMean', SubtractMean)
 transform_factory.register_builder('RandomVerticalFlip', RandomVerticalFlip)
-# transform_factory.register_builder(
-#     'RandomHorizontalFlip', RandomHorizontalFlip)
+transform_factory.register_builder(
+    'RandomHorizontalFlip', RandomHorizontalFlip)
 # transform_factory.register_builder('RandomErasing', RandomErasing)
 
 
