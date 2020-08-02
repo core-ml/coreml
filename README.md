@@ -5,12 +5,13 @@
 - [Features](#features)
 - [Setup](#setup)
 - [Quickstart](#quickstart)
+- [How-Tos](#how-tos)
 - [Testing](#testing)
 - [TODOs](#todos)
 - [Authors](#authors)
 
 ## Features
-- Support for end-to-end training using `PyTorch`.
+- Support for end-to-end training using `PyTorch` with custom training and validation loops.
 - Makes every aspect of the training pipeline configurable.
 - Provides the ability to define and change architectures right in the config file.
 - Built-in support for experiment tracking using `Weights & Biases`.
@@ -117,6 +118,60 @@ optional arguments:
                         wandb project name
   --seed SEED           seed for the experiment
 ```
+
+## How-Tos
+This section demonstrates the power of everything being parameterized by a config. Refer to `configs/defaults/binary-cifar-classification.yml`
+as the base config file on top of which we demonstrate the individual components.
+
+### Setting optimization parameters
+
+```yaml
+model:
+    name: classification
+    batch_size: 8
+    epochs: 1
+    optimizer:
+      name: SGD
+      args:
+        lr: 0.001
+        momentum: 0.9
+        nesterov: true
+      scheduler:
+        update: epoch
+        value: loss
+        name: ReduceLROnPlateau
+        params:
+            mode: 'min'
+            factor: 0.1
+            patience: 5
+            verbose: true
+            threshold: 0.0001
+            threshold_mode: abs
+     loss:
+      train:
+        name: binary-cross-entropy
+        params:
+            reduction: none
+      val:
+        name: binary-cross-entropy
+        params:
+            reduction: none
+```
+The above example shows how to set various hyperparameters like the batch size, number of epochs, optimizer, learning rate scheduler and the loss function. The interesting aspect is how the optimizer, learning rate scheduler and the loss function is directly defined in the config file. This is possible because of the [Factory Design Pattern](https://www.tutorialspoint.com/design_pattern/factory_pattern.htm) used throughout the codebase. For `optimizer`, we currently support:
+- `SGD`
+- `Adam`
+- `AdamW`
+
+However, other optimization functions can be simply added by registering their corresponding builders in `coreml/optimizers.py`. For each optimizer, `args` contains any parameters required by their corresponding PyTorch definition.
+
+Similarly, we support multiple learning rate schedulers defined in PyTorch along parameterizing whether the scheduler's step should take place after each batch or after each epoch. This is controlled by the key `update`, which can be one of `['epoch', 'batch']`. The key `value` can be set to decide what parameter should be monitored for the scheduler's step. In the above example, the validation `loss` is being monitored. Currently, we suport the following schedulers:
+- `ReduceLROnPlateau`
+- `StepLR`
+- `CyclicLR`
+- `OneCycleLR`
+- `MultiStepLR`
+
+We also parameterize the loss function to be used and allow for different loss functions for training and validation. The need for making them different could arise in various situations. One such example is applying label smoothing during training but not during validation.
 
 ## Testing
 We use `unittest` for all our tests. Simply run the following inside the Docker container:
