@@ -39,4 +39,3 @@ COPY requirements.txt .
 
 # Install the required packages
 RUN cat requirements.txt | xargs -n 1 pip install | while read line; do echo $line; done;
-

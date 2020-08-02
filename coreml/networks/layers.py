@@ -14,6 +14,8 @@ from coreml.networks.backbones.resnet import resnet18, resnet34, resnet50, \
     resnet101, resnet152, resnext50_32x4d, resnext101_32x8d
 from coreml.networks.backbones.vgg import vgg11, vgg13, vgg16, vgg19, \
     vgg11_bn, vgg13_bn, vgg16_bn, vgg19_bn
+from coreml.networks.backbones.efficientnet import efficientnet_b0, \
+    efficientnet_b4, efficientnet_b7
 
 
 class Swish(Module):
@@ -55,6 +57,6 @@ factory.register_builder('vgg13_bn', vgg13_bn)
 factory.register_builder('vgg16_bn', vgg16_bn)
 factory.register_builder('vgg19_bn', vgg19_bn)
 factory.register_builder('Swish', Swish)
-# factory.register_builder('efficientnet-b4', efficientnet_b4)
-# factory.register_builder('efficientnet-b0', efficientnet_b0)
-# factory.register_builder('efficientnet-b7', efficientnet_b7)
+factory.register_builder('efficientnet-b4', efficientnet_b4)
+factory.register_builder('efficientnet-b0', efficientnet_b0)
+factory.register_builder('efficientnet-b7', efficientnet_b7)
