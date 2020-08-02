@@ -42,7 +42,6 @@ class BinaryClassificationModelEvaluationTestCase(unittest.TestCase):
         tester_cfg = deepcopy(self.cfg)
         tester_cfg.model['load']['version'] = 'default'
         tester_cfg.model['load']['load_best'] = True
-        kwargs = {'threshold': 0.5}
         model = BinaryClassificationModel(tester_cfg)
         dataloader, _ = get_dataloader(
             tester_cfg.data, 'val',
@@ -50,7 +49,7 @@ class BinaryClassificationModelEvaluationTestCase(unittest.TestCase):
             num_workers=4,
             shuffle=False,
             drop_last=False)
-        model.evaluate(dataloader, 'val', False, **kwargs)
+        model.evaluate(dataloader, 'val', False)
 
 
 if __name__ == "__main__":

@@ -125,10 +125,10 @@ class BinaryClassificationModel(Model):
 
         :return: dictionary with different values as one tensor
         """
-        epoch_data['inputs'] = torch.cat(epoch_data['inputs']).cpu().numpy()
+        epoch_data['inputs'] = torch.cat(epoch_data['inputs']).numpy()
         epoch_data['predictions'] = torch.cat(
-            epoch_data['predictions']).detach().cpu()
-        epoch_data['targets'] = torch.cat(epoch_data['targets']).detach().cpu()
+            epoch_data['predictions'])
+        epoch_data['targets'] = torch.cat(epoch_data['targets'])
         epoch_data['items'] = np.hstack(epoch_data['items'])
         return epoch_data
 
