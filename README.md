@@ -1,12 +1,12 @@
 # CoreML
 
-`coreml` is an end-to-end machine learning framework aimed at supporting rapid prototyping. It is built on top of PyTorch by combining the several components of any ML pipeline, right from definining the dataset object, choosing how to sample each batch, preprocessing your inputs and labels, iterating on different network architectures, applying various weight initializations, running pretrained models, freezing certain layers, changing optimizers, adding learning rate schedulers, and detailed logging, into a simple `model.fit()` framework, similar to [`scikit-learn`](https://github.com/scikit-learn/scikit-learn). It is written in a very modular way making it easily extensible for different tasks, modalities and training recipes, avoiding duplication wherever possible.   
+`coreml` is an end-to-end machine learning framework aimed at supporting rapid prototyping. It is built on top of PyTorch by combining the several components of any ML pipeline, right from definining the dataset object, choosing how to sample each batch, preprocessing your inputs and labels, iterating on different network architectures, applying various weight initializations, running pretrained models, freezing certain layers, changing optimizers, adding learning rate schedulers, and detailed logging, into a simple `model.fit()` framework, similar to [`scikit-learn`](https://github.com/scikit-learn/scikit-learn). The codebase is very modular making it easily extensible for different tasks, modalities and training recipes, avoiding duplication wherever possible.   
 
 ## Features
-- Support for end-to-end training using PyTorch.
+- Support for end-to-end training using `PyTorch`.
 - Makes every aspect of the training pipeline configurable.
 - Provides the ability to define and change architectures right in the config file.
-- Built-in support for experiment tracking using Weights & Biases.
+- Built-in support for experiment tracking using `Weights & Biases`.
 - Supports tracking instance-level loss over epochs.
 - Logs predictions and metrics over epochs to allow future analysis.
 - Supports saving checkpoints and optimizing thresholds based on specific subsets.
