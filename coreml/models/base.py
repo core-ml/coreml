@@ -166,7 +166,7 @@ class Model(Estimator):
         :return: dict containing a running list of various losses per batch
         """
         for loss_name, loss_value in losses.items():
-            loss_dict[loss_name].append(loss_value.reshape(-1))
+            loss_dict[loss_name].append(loss_value.reshape(-1).detach().cpu())
 
         return loss_dict
 
@@ -374,24 +374,14 @@ class Model(Estimator):
             # ground truth and item in the batch
             batch_data = self.process_batch(batch, mode)
 
-            for key in batch_data:
-                epoch_data[key].append(batch_data[key])
-
             # calculate loss per instance in the batch
             _instance_losses = self.calculate_instance_loss(
                 predictions=batch_data['predictions'],
                 targets=batch_data['targets'],
                 mode=mode)
 
-            # append batch loss to the list of losses for the epoch
-            instance_losses = self._accumulate_losses(
-                instance_losses, _instance_losses)
-
             # calculate loss for the batch
             _batch_losses = self.calculate_batch_loss(_instance_losses)
-
-            # append batch loss to the list of losses for the epoch
-            batch_losses = self._accumulate_losses(batch_losses, _batch_losses)
 
             if mode is not None:
                 # log batch summary
@@ -401,6 +391,13 @@ class Model(Estimator):
                 if 'train' in mode:
                     self.update_network_params(_batch_losses)
 
+            # append batch loss to the list of losses for the epoch
+            instance_losses = self._accumulate_losses(
+                instance_losses, _instance_losses)
+
+            # append batch loss to the list of losses for the epoch
+            batch_losses = self._accumulate_losses(batch_losses, _batch_losses)
+
             # accumulate learning rate before scheduler step
             self._accumulate_lr(learning_rates)
 
@@ -409,13 +406,16 @@ class Model(Estimator):
             if hasattr(self, 'update_freq') and 'batch' in self.update_freq and mode == 'train':
                 self.update_optimizer_params(_batch_losses, 'batch')
 
+            # accumulate predictions, targets and items over the epoch
+            for key in batch_data:
+                if isinstance(batch_data[key], torch.Tensor):
+                    batch_data[key] = batch_data[key].detach().cpu()
+                epoch_data[key].append(batch_data[key])
+
             # ignore other batches after the first batch if we are
             # overfitting a batch
             if overfit_batch:
                 break
-
-            # if batchID == 10:
-            #     break
 
         logging.info('Gathering data')
         epoch_data = self._gather_data(epoch_data)
