@@ -410,7 +410,7 @@ class BinaryClassificationModel(Model):
                 'network': self.network.get_state_dict(),
                 'optimizer': self.optimizer.state_dict(),
                 'epoch': self.epoch_counter,
-                'metrics': epoch_metric_values
+                # 'metrics': epoch_metric_values
             }, save_status['path'])
 
     def load(self, load_config: Dict):
