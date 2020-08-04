@@ -92,41 +92,45 @@ class DataProcessorTestCase(unittest.TestCase):
 
     def test_subtract_mean_dims_aligned(self):
         """Tests subtract mean dims already aligned"""
-        dummy = torch.tensor([[0.1, 0.5, 0.6], [0.2, 0.4, 0.3]])
+        dummy = torch.tensor(
+            [[0.1, 0.5, 0.6], [0.2, 0.4, 0.3]]).T.unsqueeze(-1)
         mean = [0.1, 0.2, 0.2]
 
         config = [
             {
-                'name': 'SubtractMean',
+                'name': 'Normalize',
                 'params': {
-                    'mean': mean
+                    'mean': mean,
+                    'std': [1, 1, 1]
                 }
             }
         ]
         processor = DataProcessor(config)
 
         t_dummy = processor(dummy)
-        target = torch.tensor([[0.0, 0.3, 0.4], [0.1, 0.2, 0.1]])
+        target = torch.tensor(
+            [[0.0, 0.3, 0.4], [0.1, 0.2, 0.1]]).T.unsqueeze(-1)
         assert_array_almost_equal(target, t_dummy)
 
     def test_subtract_mean_align_dim(self):
         """Tests subtract mean with dim specified"""
-        dummy = torch.tensor([[0.1, 0.5, 0.6], [0.2, 0.4, 0.3]]).T
+        dummy = torch.tensor([[0.1, 0.5, 0.6], [0.2, 0.4, 0.3]]).unsqueeze(-1)
         mean = [0.1, 0.2, 0.2]
 
         config = [
             {
-                'name': 'SubtractMean',
+                'name': 'Normalize',
                 'params': {
                     'mean': mean,
-                    'dim': 0
+                    'std': [1, 1, 1],
+                    'dim': 1
                 }
             }
         ]
         processor = DataProcessor(config)
 
         t_dummy = processor(dummy)
-        target = torch.tensor([[0.0, 0.3, 0.4], [0.1, 0.2, 0.1]]).T
+        target = torch.tensor([[0.0, 0.3, 0.4], [0.1, 0.2, 0.1]]).unsqueeze(-1)
         assert_array_almost_equal(target, t_dummy)
 
     def test_random_vertical_flip_2d(self):

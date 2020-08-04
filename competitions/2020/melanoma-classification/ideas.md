@@ -3,3 +3,10 @@
 - Augmentations
 - Patient-level aggregation or consistency
 - sampling for equal per batch
+- random rotation
+- scheduler
+- more augmentation - rotation, noise, color jitter, blurring
+- check input range
+- momentum and others
+- normalize using torchvision imagenet mean std
+- superconvergence
