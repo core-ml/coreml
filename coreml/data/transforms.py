@@ -128,6 +128,31 @@ class Resize(KorniaBase):
             kornia.geometry.transform.affwarp.Resize, size=size)
 
 
+class ColorJitter(KorniaBase):
+    """Change the brightness, contrast, saturation and hue randomly
+
+    Wrapper for `kornia.augmentation.ColorJitter`. Refer to
+    torchvision.transforms to understand the meaning of each argument.
+
+    :param brightness: defaults to 0
+    :type brightness: Union[torch.Tensor, float, Tuple[float, float], List[float]]
+    :param contrast: defaults to 0
+    :type contrast: Union[torch.Tensor, float, Tuple[float, float], List[float]]
+    :param saturation: defaults to 0
+    :type saturation: Union[torch.Tensor, float, Tuple[float, float], List[float]]
+    :param hue: defaults to 0
+    :type hue: Union[torch.Tensor, float, Tuple[float, float], List[float]]
+    """
+    def __init__(
+            self, brightness: Union[torch.Tensor, float, Tuple[float, float], List[float]] = 0.,
+            contrast: Union[torch.Tensor, float, Tuple[float, float], List[float]] = 0.,
+            saturation: Union[torch.Tensor, float, Tuple[float, float], List[float]] = 0.,
+            hue: Union[torch.Tensor, float, Tuple[float, float], List[float]] = 0.):
+        super(ColorJitter, self).__init__(
+            kornia.augmentation.ColorJitter, brightness=brightness,
+            contrast=contrast, saturation=saturation, hue=hue)
+
+
 class Normalize(KorniaBase):
     """Normalize an input with given mean and standard deviation
 
@@ -280,6 +305,7 @@ transform_factory.register_builder('Permute', Permute)
 transform_factory.register_builder('Normalize', Normalize)
 transform_factory.register_builder('Rescale', Rescale)
 transform_factory.register_builder('RandomRotation', RandomRotation)
+transform_factory.register_builder('ColorJitter', ColorJitter)
 transform_factory.register_builder('RandomVerticalFlip', RandomVerticalFlip)
 transform_factory.register_builder(
     'RandomHorizontalFlip', RandomHorizontalFlip)

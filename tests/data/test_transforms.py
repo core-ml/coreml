@@ -372,6 +372,43 @@ class DataProcessorTestCase(unittest.TestCase):
         t_dummy = processor(dummy)
         assert_array_almost_equal(dummy, t_dummy)
 
+    def test_colorjitter(self):
+        """Tests ColorJiter"""
+        torch.manual_seed(0)
+        dummy = torch.rand(3, 5, 5)
+        expected = torch.tensor([
+         [[0.6863, 0.9709, 0.2014, 0.3054, 0.4860],
+          [0.8358, 1.0000, 1.0000, 0.6502, 0.7154],
+          [0.1962, 0.3835, 0.9929, 0.4433, 0.4729],
+          [0.7237, 0.5893, 0.9653, 0.1961, 0.3046],
+          [0.8852, 1.0000, 0.7024, 0.4536, 0.6027]],
+         [[1.0000, 1.0000, 0.8778, 0.7666, 1.0000],
+          [0.3821, 1.0000, 0.2783, 0.3303, 0.3239],
+          [0.6277, 0.7232, 1.0000, 0.9284, 0.9818],
+          [0.6332, 0.4211, 0.7802, 0.9193, 1.0000],
+          [0.2849, 0.4944, 1.0000, 0.5254, 1.0000]],
+
+         [[0.9540, 1.0000, 0.9027, 0.6902, 0.9508],
+          [0.7502, 0.6776, 1.0000, 0.5409, 0.8339],
+          [0.9316, 0.9055, 0.1823, 0.3414, 0.4848],
+          [0.6290, 0.9019, 1.0000, 1.0000, 1.0000],
+          [0.7763, 0.6276, 0.5818, 1.0000, 1.0000]]])
+
+        config = [
+            {
+                'name': 'ColorJitter',
+                'params': {
+                    'brightness': 0.2,
+                    'contrast': 0.2,
+                    'hue': 0.2,
+                    'saturation': 0.2
+                }
+            }
+        ]
+        processor = DataProcessor(config)
+        t_dummy = processor(dummy)
+        assert_array_almost_equal(t_dummy, expected, decimal=4)
+
 
 if __name__ == "__main__":
     unittest.main()

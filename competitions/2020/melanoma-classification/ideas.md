@@ -10,3 +10,8 @@
 - momentum and others
 - normalize using torchvision imagenet mean std
 - superconvergence
+- optimizer
+- TTA
+- More data
+- better pretrained model
+- 
