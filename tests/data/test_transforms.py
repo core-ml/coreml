@@ -58,6 +58,20 @@ class DataProcessorTestCase(unittest.TestCase):
 
         self.assertEqual(transformed_input.shape, (2, *target_size))
 
+    def test_rescale_transform(self):
+        """Checks Rescale transform"""
+        config = [
+            {
+                'name': 'Rescale',
+                'params': {'value': 255}
+            }
+        ]
+
+        processor = DataProcessor(config)
+        dummy_signal = torch.ones(100) * 255.
+        transformed_signal = processor(dummy_signal)
+        assert_array_equal(transformed_signal, 1.0)
+
     def test_transpose(self):
         """Checks Transpose"""
         dummy = torch.ones((10, 20))

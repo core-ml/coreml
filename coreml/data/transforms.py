@@ -35,6 +35,28 @@ class Permute:
         return signal.permute(*self.order)
 
 
+class Rescale:
+    """Rescale the given input by a particular value
+
+    Example:
+    >>> signal = torch.ones(100) * 255
+    >>> signal.max()
+    (255)
+    >>> t_signal = Rescale(255.)(signal)
+    >>> t_signal.max()
+    (1.)
+
+    :param value: value to scale the input by
+    :type value: int
+    """
+    def __init__(self, value: int):
+        assert value
+        self.value = value
+
+    def __call__(self, signal: torch.Tensor) -> torch.Tensor:
+        return signal / self.value
+
+
 class KorniaBase:
     """Base class to apply any kornia augmentation
 
@@ -241,6 +263,7 @@ transform_factory.register_builder('Resize', Resize)
 transform_factory.register_builder('Transpose', Transpose)
 transform_factory.register_builder('Permute', Permute)
 transform_factory.register_builder('Normalize', Normalize)
+transform_factory.register_builder('Rescale', Rescale)
 transform_factory.register_builder('RandomVerticalFlip', RandomVerticalFlip)
 transform_factory.register_builder(
     'RandomHorizontalFlip', RandomHorizontalFlip)
