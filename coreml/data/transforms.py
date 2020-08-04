@@ -178,6 +178,21 @@ class RandomVerticalFlip(KorniaBase):
             kornia.augmentation.RandomVerticalFlip, p=p)
 
 
+class RandomRotation(KorniaBase):
+    """Randomly flips the input along the vertical axis
+
+    Wrapper for `kornia.augmentation.RandomRotation`
+
+    :param p: probability of the input being flipped; defaults to 0.5
+    :type p: float
+    """
+    def __init__(
+            self, degrees: Union[torch.Tensor, float, Tuple[float, float],
+                                 List[float]]):
+        super(RandomRotation, self).__init__(
+            kornia.augmentation.RandomRotation, degrees=degrees)
+
+
 class RandomHorizontalFlip(KorniaBase):
     """Randomly flips the input along the horizontal axis
 
@@ -264,6 +279,7 @@ transform_factory.register_builder('Transpose', Transpose)
 transform_factory.register_builder('Permute', Permute)
 transform_factory.register_builder('Normalize', Normalize)
 transform_factory.register_builder('Rescale', Rescale)
+transform_factory.register_builder('RandomRotation', RandomRotation)
 transform_factory.register_builder('RandomVerticalFlip', RandomVerticalFlip)
 transform_factory.register_builder(
     'RandomHorizontalFlip', RandomHorizontalFlip)

@@ -72,6 +72,33 @@ class DataProcessorTestCase(unittest.TestCase):
         transformed_signal = processor(dummy_signal)
         assert_array_equal(transformed_signal, 1.0)
 
+    def test_random_rotation(self):
+        """Tests RandomRotation"""
+        dummy = torch.tensor([[1., 0., 0., 2.],
+                              [0., 0., 0., 0.],
+                              [0., 1., 2., 0.],
+                              [0., 0., 1., 2.]])  # 4 x 4
+
+        expected = torch.tensor(
+            [[0.9824, 0.0088, 0.0000, 1.9649],
+             [0.0000, 0.0029, 0.0000, 0.0176],
+             [0.0029, 1.0000, 1.9883, 0.0000],
+             [0.0000, 0.0088, 1.0117, 1.9649]])  # 1 x 4 x 4
+
+        config = [
+            {
+                'name': 'RandomRotation',
+                'params': {
+                    'degrees': 45.
+                }
+            }
+        ]
+        torch.manual_seed(0)
+        processor = DataProcessor(config)
+
+        t_dummy = processor(dummy)
+        assert_array_almost_equal(t_dummy, expected, decimal=4)
+
     def test_transpose(self):
         """Checks Transpose"""
         dummy = torch.ones((10, 20))
