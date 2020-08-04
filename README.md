@@ -17,9 +17,11 @@
 ## Features
 - Support for end-to-end training using `PyTorch` with custom training and validation loops.
 - Makes every aspect of the training pipeline configurable.
+- Data preprocessing on GPU using `kornia`.
 - Provides the ability to define and change architectures right in the config file.
 - Built-in support for experiment tracking using `Weights & Biases`.
-- Supports tracking instance-level loss over epochs.
+- Enables replicability through `Docker` containers.
+- Supports tracking instance-level losses over epochs.
 - Logs predictions and metrics over epochs to allow future analysis.
 - Supports saving checkpoints and optimizing thresholds based on specific subsets.
 - Defines several metrics like `PrecisionAtRecall`, `SpecificityAtSensitivity` and `ConfusionMatrix`.
