@@ -118,14 +118,13 @@ class BinaryClassificationModel(Model):
         return losses
 
     def _gather_data(self, epoch_data: dict) -> Tuple:
-        """Gather inputs, preds, targets & other epoch data in one tensor
+        """Gather preds, targets & other epoch data in one tensor
 
         :param epoch_data: dictionary containing lists of various epoch values
         :type epoch_data: dict
 
         :return: dictionary with different values as one tensor
         """
-        epoch_data['inputs'] = torch.cat(epoch_data['inputs']).numpy()
         epoch_data['predictions'] = torch.cat(
             epoch_data['predictions'])
         epoch_data['targets'] = torch.cat(epoch_data['targets'])
@@ -504,22 +503,12 @@ class BinaryClassificationModel(Model):
         super(BinaryClassificationModel, self)._update_wandb(
             mode, epoch_losses, metrics)
 
-        # decide indices to visualize
-        indices = get_indices(epoch_data['targets'])
-
         # log learning rates vs losses
         if learning_rates is not None and batch_losses is not None:
             lr_vs_loss = plot_lr_vs_loss(
                 learning_rates, batch_losses['loss'], as_figure=True)
             self.wandb_logs['{}/lr-vs-loss'.format(mode)] = lr_vs_loss
             plt.close()
-
-        # log original inputs
-        input_images = get_images(
-            epoch_data['inputs'][indices].tolist(),
-            epoch_data['predictions'][indices],
-            epoch_data['targets'][indices])
-        self.wandb_logs['{}/inputs'.format(mode)] = input_images
 
         self.wandb_logs['{}/confusion_matrix'.format(mode)] = wandb.Image(
             get_confusion_matrix(
