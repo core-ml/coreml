@@ -408,12 +408,13 @@ class Model(Estimator):
 
             # accumulate predictions, targets and items over the epoch
             for key in batch_data:
+                if isinstance(batch_data[key], torch.Tensor):
+                    batch_data[key] = batch_data[key].detach().cpu()
+
                 # ignore storing inputs
                 if key == 'inputs':
                     continue
 
-                if isinstance(batch_data[key], torch.Tensor):
-                    batch_data[key] = batch_data[key].detach().cpu()
                 epoch_data[key].append(batch_data[key])
 
             # ignore other batches after the first batch if we are
