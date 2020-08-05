@@ -3,6 +3,7 @@
 $ python evaluation/eval.py -v version
 """
 import logging
+import warnings
 import argparse
 import os
 from os.path import join, dirname, splitext, basename
@@ -14,9 +15,10 @@ from coreml.config import Config
 from coreml.data.dataloader import get_dataloader
 from coreml.models import factory as model_factory
 from coreml.utils.logger import set_logger, color
+warnings.simplefilter('ignore')
 
 
-def evaluate(config, mode, use_wandb, ignore_cache):
+def evaluate(config, mode, use_wandb, ignore_cache, n_tta):
     """Run the actual evaluation
 
     :param config: config for the model to evaluate
@@ -39,15 +41,29 @@ def evaluate(config, mode, use_wandb, ignore_cache):
 
     # set to eval mode
     model.network.eval()
-    results = model.evaluate(
-        dataloader, mode, use_wandb,
-        ignore_cache, data_only=True, log_summary=False)
 
-    # logits
-    predictions = results['predictions']
+    all_predictions = []
+    for run_index in range(n_tta):
+        logging.info(f'TTA run #{run_index + 1}')
+        results = model.evaluate(
+            dataloader, mode, use_wandb,
+            ignore_cache, data_only=True, log_summary=False)
 
-    # convert to softmax
-    predictions = torch.sigmoid(predictions)
+        logging.info(f'AUC = {results["auc-roc"]}')
+
+        # logits
+        predictions = results['predictions']
+
+        # convert to softmax
+        predictions = torch.sigmoid(predictions)
+
+        # add to list of all predictions across each TTA run
+        all_predictions.append(predictions)
+
+    all_predictions = torch.stack(all_predictions, -1)
+
+    # take the mean across several TTA runs
+    predictions = all_predictions.mean(-1)
 
     # get the file names
     names = [splitext(basename(item.path))[0] for item in results['items']]
@@ -95,7 +111,7 @@ def main(args):
         wandb.config.update(config.__dict__)
 
     config.num_workers = args.num_workers
-    evaluate(config, args.mode, args.wandb, args.ignore_cache)
+    evaluate(config, args.mode, args.wandb, args.ignore_cache, args.n_tta)
 
 
 if __name__ == '__main__':
@@ -120,5 +136,7 @@ if __name__ == '__main__':
                         help='wandb project name')
     parser.add_argument('-o', '--output', type=str,
                         help='wandb project name')
+    parser.add_argument('--n-tta', type=int, default=1,
+                        help='number of times to run TTA')
     args = parser.parse_args()
     main(args)
