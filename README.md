@@ -323,6 +323,7 @@ $ python -m unittest discover tests
 ```
 
 ## TODOs
+- Tracking inputs on W&B (currently `torch.cat` kills the process when the inputs are large).
 - Add augmentations
 - Support for audio classification
 - Support for multi-class classification
