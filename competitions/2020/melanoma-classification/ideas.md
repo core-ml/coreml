@@ -14,4 +14,11 @@
 - TTA
 - More data
 - better pretrained model
-- 
+
+
+V2
+add more data - look up
+cyclicLR
+rotation
+higher resolution image
+random enlarge = when using older datasets
