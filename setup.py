@@ -32,7 +32,7 @@ setuptools.setup(
         'scipy==1.4.1',
         'seaborn==0.10.0',
         'termcolor==1.1.0',
-        'torch==1.6.0',
+        'torch>=1.5.0',
         'torchaudio==0.6.0',
         'torchsummary==1.5.1',
         'torchtext==0.4.0',
