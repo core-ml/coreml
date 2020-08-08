@@ -11,7 +11,7 @@ audioread==2.1.8
 Babel==2.7.0
 backcall==0.1.0
 beautifulsoup4==4.9.0
-bleach==3.1.0
+bleach==3.1.5
 blis==0.4.1
 boto3==1.10.44
 botocore==1.13.44
@@ -28,7 +28,7 @@ conda==4.8.0
 conda-build==3.18.11
 conda-package-handling==1.6.0
 configparser==5.0.0
-coreml==0.0.3
+coreml==0.0.9
 coverage==5.0
 CProfileV==1.0.7
 cryptography==2.8

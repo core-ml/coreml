@@ -33,10 +33,9 @@ setuptools.setup(
         'seaborn==0.10.0',
         'termcolor==1.1.0',
         'torch>=1.5.0',
-        'torchaudio==0.6.0',
         'torchsummary==1.5.1',
         'torchtext==0.4.0',
-        'torchvision==0.7.0',
+        'torchvision>=0.6.1',
         'tqdm==4.45.0',
         'wandb==0.9.4',
         'xgboost==1.1.1'
