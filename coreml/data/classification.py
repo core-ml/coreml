@@ -23,6 +23,8 @@ def get_classification_dataset(base_dataset):
     class ClassificationDataset(base_dataset):
         """Dataset class for single-label classification
 
+        :param data_root: directory where data versions reside
+        :type data_root: str
         :param dataset_config: defines the config for the
             data to be loaded. The config is specified by a list of dict, with
             each dict representing: (dataset_name, dataset_version,
@@ -38,12 +40,12 @@ def get_classification_dataset(base_dataset):
         :param fraction: fraction of the data to load, defaults to 1.0
         :type fraction: float
         """
-        def __init__(self, dataset_config: List[DatasetConfigDict],
-                     target_transform: ClassificationAnnotationTransform = None,
-                     signal_transform: DataProcessor = None,
-                     fraction: float = 1.0):
+        def __init__(
+                self, data_root: str, dataset_config: List[DatasetConfigDict],
+                target_transform: ClassificationAnnotationTransform = None,
+                signal_transform: DataProcessor = None, fraction: float = 1.0):
             super(ClassificationDataset, self).__init__(
-                dataset_config, fraction)
+                data_root, dataset_config, fraction)
             self.target_transform = target_transform
             self.signal_transform = signal_transform
 
@@ -83,10 +85,12 @@ def get_classification_dataset(base_dataset):
 
 class ClassificationDatasetBuilder:
     """Builds a ClassificationDataset object"""
-    def __call__(self, data_type: str, mode: str, dataset_config: List[dict],
-                 **kwargs):
+    def __call__(self, data_root: str, data_type: str, mode: str,
+                 dataset_config: List[dict], **kwargs):
         """Builds a ClassificationDataset object
 
+        :param data_root: directory where data versions reside
+        :type data_root: str
         :param data_type: data type used to pick the base dataset
         :type data_type: str
         :param mode: mode/split to load; one of {'train', 'test', 'val'}
@@ -103,6 +107,7 @@ class ClassificationDatasetBuilder:
             dataset_config[i]['mode'] = mode
 
         kwargs['dataset_config'] = dataset_config
+        kwargs['data_root'] = data_root
         base_dataset = base_dataset_mapping[data_type]
         self._instance = get_classification_dataset(base_dataset)(**kwargs)
         return self._instance

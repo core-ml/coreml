@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="coreml",
-    version="0.0.6",
+    version="0.0.7",
     author="Aman Dalmia",
     author_email="amandalmia18@gmail.com",
     description="Generic Framework for ML projects",
@@ -27,7 +27,7 @@ setuptools.setup(
         'opencv-python',
         'pandas==1.0.3',
         'Pillow==7.1.1',
-        'PyYAML==5.2',
+        'PyYAML',
         'scikit-learn==0.22.2.post1',
         'scipy==1.4.1',
         'seaborn==0.10.0',

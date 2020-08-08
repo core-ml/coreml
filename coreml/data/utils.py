@@ -1,17 +1,19 @@
 from typing import Tuple
 from os.path import join
 import sys
-from coreml.config import DATA_ROOT
 from coreml.utils.logger import color
 from coreml.utils.io import read_yml
 from coreml.utils.typing import DatasetConfigDict
 
 
-def read_dataset_from_config(dataset_config: DatasetConfigDict) -> dict:
+def read_dataset_from_config(
+        data_root: str, dataset_config: DatasetConfigDict) -> dict:
     """
     Loads and returns the dataset version file corresponding to the
     dataset config.
 
+    :param data_root: directory where data versions reside
+    :type dataset_config: DatasetConfigDict
     :param dataset_config: dict containing `(name, version, mode)`
         corresponding to a dataset. Here, `name` stands for the name of the
         dataset under the `/data` directory, `version` stands for the version
@@ -21,7 +23,7 @@ def read_dataset_from_config(dataset_config: DatasetConfigDict) -> dict:
     :returns: dict of values stored in the version file
     """
     version_fpath = join(
-        DATA_ROOT, dataset_config['name'],
+        data_root, dataset_config['name'],
         'processed/versions', dataset_config['version'] + '.yml')
 
     print(color("=> Loading dataset version file: [{}, {}, {}]".format(

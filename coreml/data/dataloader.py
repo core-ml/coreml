@@ -84,6 +84,7 @@ def get_dataloader(
         'signal_transform': signal_transform,
         'mode': mode,
         'data_type': cfg['data_type'],
+        'data_root': cfg['root'],
         'dataset_config': cfg['dataset']['config']
     })
 

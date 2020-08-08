@@ -4,13 +4,10 @@ from os.path import join, dirname, splitext
 from typing import Dict, Any
 from coreml.utils.io import read_yml, save_yml
 
-# project home mounted inside docker
-HOME = "/workspace/coreml/"
-
-# user-dependent output directory mounted inside docker
+# default output directory to use
 OUT_DIR = "/output/"
 
-# directory where the cough data resides (mounted in Docker container)
+# default directory where the data versions reside
 DATA_ROOT = "/data"
 
 
@@ -24,9 +21,9 @@ class Config:
     def __init__(self, version: str):
         assert version.endswith('.yml')
         self.version = version
-        self.paths = {'HOME': HOME, 'OUT_DIR': OUT_DIR}
+        self.update_from_path(version)
 
-        config_path = os.path.join(self.paths['HOME'], version)
+        self.paths = {'OUT_DIR': self.__dict__.get('output_dir', OUT_DIR)}
         config_subpath = version.replace('.yml', '')
         self.config_save_path = os.path.join(
             self.paths['OUT_DIR'], config_subpath, 'config.yml')
@@ -36,7 +33,9 @@ class Config:
         self.checkpoint_dir = os.path.join(self.output_dir, "checkpoints")
         self.log_dir = os.path.join(self.output_dir, "logs")
 
-        self.update_from_path(config_path)
+        # set data directory
+        self.__dict__['data']['root'] = self.__dict__['data'].get(
+            'root', DATA_ROOT)
 
         # save the config
         self.save()

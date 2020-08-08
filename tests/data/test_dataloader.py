@@ -19,6 +19,7 @@ class DataloaderTestCase(unittest.TestCase):
     def test_classification_dataloader_2d(self):
         """Test get_dataloader for classification with each input being 2D"""
         cfg = {
+            'root': DATA_ROOT,
             'data_type': 'image',
             'dataset': {
                 'name': 'classification_dataset',

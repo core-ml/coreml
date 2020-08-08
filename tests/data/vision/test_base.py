@@ -27,7 +27,7 @@ class BaseImageDatasetTestCase(unittest.TestCase):
                 'mode': 'test'
             }
         ]
-        dataset = BaseImageDataset(dataset_config)
+        dataset = BaseImageDataset(DATA_ROOT, dataset_config)
         self.assertEqual(len(dataset.items), 10000)
 
 

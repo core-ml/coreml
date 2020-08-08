@@ -60,9 +60,9 @@ class ClassificationDatasetTestCase(unittest.TestCase):
             'mode': 'train'
         }
         test_dataset = get_classification_dataset(BaseImageDataset)(
-            [test_dataset_config])
+            DATA_ROOT, [test_dataset_config])
         train_dataset = get_classification_dataset(BaseImageDataset)(
-            [train_dataset_config])
+            DATA_ROOT, [train_dataset_config])
 
         self.assertTrue(len(test_dataset.items) != len(train_dataset.items))
 
@@ -75,13 +75,13 @@ class ClassificationDatasetTestCase(unittest.TestCase):
         }
         fraction = 0.5
         dataset = get_classification_dataset(BaseImageDataset)(
-            [dataset_config], fraction=fraction)
+            DATA_ROOT, [dataset_config], fraction=fraction)
         self.assertEqual(5000, len(dataset.items))
 
     def test_dataset_no_transform(self):
         """Checks dataset using no transform"""
         dataset = get_classification_dataset(BaseImageDataset)(
-            self.dataset_config)
+            DATA_ROOT, self.dataset_config)
 
         instance = dataset[0]
         self.assertEqual(
@@ -93,6 +93,7 @@ class ClassificationDatasetTestCase(unittest.TestCase):
     def test_dataset_with_target_transform(self):
         """Checks dataset with target transform"""
         dataset = get_classification_dataset(BaseImageDataset)(
+            DATA_ROOT,
             self.dataset_config,
             target_transform=self.target_transform)
 
@@ -106,6 +107,7 @@ class ClassificationDatasetTestCase(unittest.TestCase):
     def test_dataset_with_signal_transform(self):
         """Checks dataset with signal transform"""
         dataset = get_classification_dataset(BaseImageDataset)(
+            DATA_ROOT,
             self.dataset_config,
             signal_transform=self.signal_transform,
             target_transform=self.target_transform)

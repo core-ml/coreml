@@ -38,7 +38,8 @@ class EfficientNetTestCase(unittest.TestCase):
     def test_efficientnet_features(self):
         """Test efficientnet extract_features"""
         net = EfficientNet(
-            'efficientnet-b0', num_classes=2, in_channels=1, return_features=True)
+            'efficientnet-b0', num_classes=2, in_channels=1,
+            return_features=True)
         dummy = torch.ones((128, 1, 224, 224))
         out = net(dummy)
         self.assertTrue(out.shape, (128, 1280, 7, 7))

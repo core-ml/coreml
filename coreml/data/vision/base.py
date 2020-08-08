@@ -18,6 +18,8 @@ class BaseImageDataset(BaseDataset):
     Defines the base image dataset object that needs to be inherited
     by any task-specific dataset class for images.
 
+    :param data_root: directory where data versions reside
+    :type data_root: str
     :param dataset_config: defines the config for the data to be loaded.
         The config is specified by a list of dicts, with each dict representing
         (dataset_name, dataset_version, mode [train, test, val])
@@ -30,7 +32,8 @@ class BaseImageDataset(BaseDataset):
         self.items = []
 
         for dataset_config in self.dataset_config:
-            data_info = read_dataset_from_config(dataset_config)
+            data_info = read_dataset_from_config(
+                self.data_root, dataset_config)
 
             for i in tqdm(range(len(data_info['file'])), desc='Loading items'):
                 path, label = data_info['file'][i], data_info['label'][i]
