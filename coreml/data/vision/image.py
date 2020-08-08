@@ -41,7 +41,7 @@ class Image:
         self.height, self.width = image.shape[:2]
 
         if as_tensor:
-            image = torch.FloatTensor(image)
+            image = torch.from_numpy(image).float()
 
         return {
             'signal': image

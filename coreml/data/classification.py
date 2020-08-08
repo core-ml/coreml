@@ -2,7 +2,6 @@
 Defines ClassificationDataset class which is used for classification tasks
 where each input has a single output.
 """
-
 from os.path import join
 from typing import Tuple, List, Union, Any
 
@@ -73,7 +72,8 @@ def get_classification_dataset(base_dataset):
 
         def _check_item(self, item: Any):
             assert 'classification' in item.label,\
-                "Item at index {} has no 'classification' in label".format(index)
+                "Item at index {} has no 'classification' in label".format(
+                    index)
 
         def __len__(self):
             return len(self.items)
