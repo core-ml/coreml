@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 import wandb
 import torch
+from coreml.config import DATA_ROOT
 from coreml.data.utils import read_dataset_from_config
 from coreml.utils.wandb import get_images, get_indices, get_confusion_matrix
 
@@ -16,7 +17,7 @@ class WandbCase(unittest.TestCase):
             'version': 'default',
             'mode': 'val'
         }
-        data_info = read_dataset_from_config(dataset_config)
+        data_info = read_dataset_from_config(DATA_ROOT, dataset_config)
         cls.filepaths, cls.labels = data_info['file'], data_info['label']
 
     def test_get_indices_per_class(self):
