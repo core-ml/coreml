@@ -325,6 +325,11 @@ $ python -m unittest discover tests
 ## TODOs
 - Tracking inputs on W&B (currently `torch.cat` kills the process when the inputs are large).
 - Add augmentations
+- Training with TPUs
+- Training with multiple GPUs
+- Native TTA
+- Stochastic Weight Averaging
+- Demos for various things
 - Support for audio classification
 - Support for multi-class classification
 - Add benchmarks for multiple datasets
