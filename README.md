@@ -325,6 +325,7 @@ $ python -m unittest discover tests
 ## TODOs
 - Tracking inputs on W&B (currently `torch.cat` kills the process when the inputs are large).
 - Add augmentations
+- Label Smoothing for BCE
 - Training with TPUs
 - Training with multiple GPUs
 - Native TTA
