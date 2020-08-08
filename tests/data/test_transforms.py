@@ -409,6 +409,44 @@ class DataProcessorTestCase(unittest.TestCase):
         t_dummy = processor(dummy)
         assert_array_almost_equal(t_dummy, expected, decimal=4)
 
+    def test_randomaffine(self):
+        """Tests RandomAffine"""
+        torch.manual_seed(0)
+        dummy = torch.rand(3, 5, 5)
+        expected = torch.tensor([
+         [[0.2763, 0.3109, 0.3721, 0.4599, 0.5413],
+          [0.1560, 0.1800, 0.2358, 0.3223, 0.4009],
+          [0.2102, 0.0790, 0.0983, 0.2009, 0.2835],
+          [0.2832, 0.1709, 0.0971, 0.1024, 0.1890],
+          [0.3726, 0.2669, 0.1878, 0.1354, 0.1174]],
+
+         [[0.5799, 0.6210, 0.6119, 0.5527, 0.4610],
+          [0.6795, 0.7326, 0.7336, 0.6579, 0.5626],
+          [0.7319, 0.8646, 0.8574, 0.7499, 0.6526],
+          [0.7694, 0.8488, 0.8583, 0.8301, 0.7307],
+          [0.7562, 0.7516, 0.7588, 0.7776, 0.7972]],
+
+         [[0.4247, 0.3421, 0.2600, 0.1785, 0.1672],
+          [0.3765, 0.2933, 0.2111, 0.1983, 0.2205],
+          [0.3562, 0.2546, 0.2259, 0.2647, 0.2896],
+          [0.3591, 0.3045, 0.3194, 0.3469, 0.3747],
+          [0.4069, 0.4114, 0.4245, 0.4462, 0.4756]]])
+
+        config = [
+            {
+                'name': 'RandomAffine',
+                'params': {
+                    'degrees': 45,
+                    'translate': [0.1, 0.1],
+                    'scale': [1, 8],
+                    'shear': [2, 2]
+                }
+            }
+        ]
+        processor = DataProcessor(config)
+        t_dummy = processor(dummy)
+        assert_array_almost_equal(t_dummy, expected, decimal=4)
+
 
 if __name__ == "__main__":
     unittest.main()

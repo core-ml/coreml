@@ -1,4 +1,4 @@
-from typing import List, Any, Union, Tuple, Callable
+from typing import List, Any, Union, Tuple, Callable, Optional
 import torch
 import torch.nn.functional as F
 import kornia
@@ -128,6 +128,31 @@ class Resize(KorniaBase):
             kornia.geometry.transform.affwarp.Resize, size=size)
 
 
+class RandomAffine(KorniaBase):
+    """Random affine transformation of the image keeping center invariant
+
+    Wrapper for `kornia.augmentation.RandomAffine`. Refer to
+    torchvision.transforms to understand the meaning of each argument.
+
+    :param degrees: defaults to 0
+    :type degrees: Union[float, Tuple[float, float]]
+    :param translate: defaults to None
+    :type translate: Optional[Tuple[float, float]
+    :param scale: defaults to None
+    :type scale: Optional[Tuple[float, float]
+    :param shear: defaults to None
+    :type shear: Optional[Union[float, Tuple[float, float]]]
+    """
+    def __init__(
+            self, degrees: Union[float, Tuple[float, float]] = 0,
+            translate: Optional[Tuple[float, float]] = None,
+            scale: Optional[Tuple[float, float]] = None,
+            shear: Optional[Union[float, Tuple[float, float]]] = None):
+        super(RandomAffine, self).__init__(
+            kornia.augmentation.RandomAffine, degrees=degrees,
+            translate=translate, scale=scale, shear=shear)
+
+
 class ColorJitter(KorniaBase):
     """Change the brightness, contrast, saturation and hue randomly
 
@@ -156,7 +181,7 @@ class ColorJitter(KorniaBase):
 class Normalize(KorniaBase):
     """Normalize an input with given mean and standard deviation
 
-    Wrapper for `kornia.color.Normalize`
+    Wrapper for `kornia.enhance.Normalize`
 
     :param mean: mean for each channel
     :type mean: Union[torch.Tensor, float]
@@ -171,7 +196,7 @@ class Normalize(KorniaBase):
             dim: int = 0):
         mean, std = self._check_params(mean, std)
         super(Normalize, self).__init__(
-            kornia.color.Normalize, mean=mean, std=std)
+            kornia.enhance.Normalize, mean=mean, std=std)
         self.dim = dim
 
     @staticmethod
@@ -300,6 +325,7 @@ class DataProcessor:
 transform_factory = Factory()
 transform_factory.register_builder('Compose', Compose)
 transform_factory.register_builder('Resize', Resize)
+transform_factory.register_builder('RandomAffine', RandomAffine)
 transform_factory.register_builder('Transpose', Transpose)
 transform_factory.register_builder('Permute', Permute)
 transform_factory.register_builder('Normalize', Normalize)
