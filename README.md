@@ -336,6 +336,7 @@ $ python -m unittest discover tests
 - Classification analyzer (similar to fast.ai)
 - LR finder - integrated?
 - OneCycle - intergrated?
+- Discriminative fine-tuning (see [this](https://course.fast.ai/videos/?lesson=1))
 - ~~Support for multi-class classification~~
 - Add benchmarks for multiple datasets
 - Add documentation for using new datasets and configuring different parts of the pipeline
