@@ -326,13 +326,18 @@ $ python -m unittest discover tests
 - Tracking inputs on W&B (currently `torch.cat` kills the process when the inputs are large).
 - Add augmentations
 - Label Smoothing for BCE
+- Incorporate models from `timm` (pytorch-image-models)
 - Training with TPUs
 - Training with multiple GPUs
 - Native TTA
 - Stochastic Weight Averaging
 - Demos for various things
 - Support for audio classification
-- Support for multi-class classification
+- Classification analyzer (similar to fast.ai)
+- LR finder - integrated?
+- OneCycle - intergrated?
+- Discriminative fine-tuning (see [this](https://course.fast.ai/videos/?lesson=1))
+- ~~Support for multi-class classification~~
 - Add benchmarks for multiple datasets
 - Add documentation for using new datasets and configuring different parts of the pipeline
 
