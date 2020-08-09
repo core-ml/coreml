@@ -174,6 +174,30 @@ class DataProcessorTestCase(unittest.TestCase):
         target = torch.tensor([[0.0, 0.3, 0.4], [0.1, 0.2, 0.1]]).unsqueeze(-1)
         assert_array_almost_equal(target, t_dummy)
 
+    def test_subtract_mean_imagenet(self):
+        """Tests subtract mean from specified dataset"""
+        dummy = torch.tensor(
+            [[0.1, 0.5, 0.6], [0.2, 0.4, 0.3]]).T.unsqueeze(-1)
+        mean = [0.485, 0.456, 0.406]
+
+        config = [
+            {
+                'name': 'Normalize',
+                'params': {
+                    'mean': 'imagenet',
+                    'std': [1, 1, 1]
+                }
+            }
+        ]
+
+        processor = DataProcessor(config)
+
+        t_dummy = processor(dummy)
+        target = torch.tensor([
+            [-0.3850,  0.0440,  0.1940],
+            [-0.2850, -0.0560, -0.1060]]).T.unsqueeze(-1)
+        assert_array_almost_equal(target, t_dummy)
+
     def test_random_vertical_flip_2d(self):
         """Tests RandomVerticalFlip on 2D input"""
         dummy = torch.tensor([[0., 0., 0.],

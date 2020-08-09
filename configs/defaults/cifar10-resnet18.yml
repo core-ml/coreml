@@ -13,13 +13,13 @@ model:
     optimizer:
       name: AdamW
       args:
-        lr: 0.00012
+        lr: 0.0012
         weight_decay: 0.4
       scheduler:
         name: 1cycle
         update: batch
         params:
-            max_lr: 0.003
+            max_lr: 0.03
             epochs: 35
             steps_per_epoch: 98
             pct_start: 0.3

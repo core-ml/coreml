@@ -2,6 +2,7 @@ from typing import List, Any, Union, Tuple, Callable, Optional
 import torch
 import torch.nn.functional as F
 import kornia
+from fastai.vision import imagenet_stats, cifar_stats, mnist_stats
 from coreml.factory import Factory
 from coreml.utils.typing import TransformDict
 
@@ -222,16 +223,18 @@ class Normalize(KorniaBase):
 
     Wrapper for `kornia.enhance.Normalize`
 
-    :param mean: mean for each channel
-    :type mean: Union[torch.Tensor, float]
-    :param std: standard deviations for each channel
-    :type std: Union[torch.Tensor, float]
+    :param mean: mean for each channel. Also accepts string in one of
+        ['imagenet', 'cifar', 'mnist'] to use mean from those datasets
+    :type mean: Union[torch.Tensor, float, str]
+    :param std: standard deviations for each channel, Also accepts string in
+        one of ['imagenet', 'cifar', 'mnist'] to use std from those datasets
+    :type std: Union[torch.Tensor, float, str]
     :param dim: dimension along which to normalize, defaults to 0
     :type dim: int
     """
     def __init__(
-            self, mean: Union[torch.Tensor, float],
-            std: Union[torch.Tensor, float],
+            self, mean: Union[torch.Tensor, float, str],
+            std: Union[torch.Tensor, float, str],
             dim: int = 0):
         mean, std = self._check_params(mean, std)
         super(Normalize, self).__init__(
@@ -240,6 +243,14 @@ class Normalize(KorniaBase):
 
     @staticmethod
     def _check_params(mean, std):
+        if isinstance(mean, str):
+            assert mean in ['imagenet', 'cifar', 'mnist']
+            mean = eval(f'{mean}_stats')[0]
+
+        if isinstance(std, str):
+            assert std in ['imagenet', 'cifar', 'mnist']
+            std = eval(f'{std}_stats')[1]
+
         if not isinstance(mean, torch.Tensor):
             mean = torch.FloatTensor(mean)
 
