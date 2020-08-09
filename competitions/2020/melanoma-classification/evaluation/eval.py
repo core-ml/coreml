@@ -107,8 +107,8 @@ def main(args):
 
     if args.wandb:
         # set up wandb
-        os.environ['WANDB_ENTITY'] = args.entity
-        os.environ['WANDB_PROJECT'] = args.project
+        os.environ['WANDB_ENTITY'] = config.entity
+        os.environ['WANDB_PROJECT'] = config.project
         os.environ['WANDB_DIR'] = dirname(config.checkpoint_dir)
 
         run_name = '_'.join(['evaluation', version.replace('/', '_')])
@@ -136,12 +136,6 @@ if __name__ == '__main__':
                         help='whether to ignore cache')
     parser.add_argument('--wandb', action='store_false',
                         help='whether to ignore using wandb')
-    parser.add_argument('-e', '--entity', type=str,
-                        help='wandb user/org name')
-    parser.add_argument('-p', '--project', type=str,
-                        help='wandb project name')
-    parser.add_argument('-o', '--output', type=str,
-                        help='wandb project name')
     parser.add_argument('--n-tta', type=int, default=1,
                         help='number of times to run TTA')
     args = parser.parse_args()

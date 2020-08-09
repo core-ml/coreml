@@ -22,3 +22,12 @@ cyclicLR
 rotation
 higher resolution image
 random enlarge = when using older datasets
+
+
+use PReLU
+resnet34
+RAdam
+LabelSmoothing
+Balanced dataset
+jitter
+affine
