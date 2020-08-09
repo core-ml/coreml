@@ -34,7 +34,7 @@ def classification_collate(batch: Tuple[Dict]) -> Dict:
 
     collated_batch = {
         'signals': torch.stack(signals),
-        'labels': torch.Tensor(labels).long(),
+        'labels': torch.Tensor(labels),
         'items': items
     }
 

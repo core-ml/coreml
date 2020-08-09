@@ -96,6 +96,12 @@ class BinaryClassificationModel(Model):
         loss_config = self.model_config.get('loss')[mode]
         criterion = loss_factory.create(
             loss_config['name'], **loss_config['params'])
+
+        # correct data type to handle mismatch between
+        # CrossEntropyLoss and BCEWithLogitsLoss
+        if loss_config['name'] == 'cross-entropy':
+            targets = targets.long()
+
         loss = criterion(predictions, targets)
 
         if as_numpy:

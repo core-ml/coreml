@@ -14,7 +14,6 @@ model:
       name: AdamW
       args:
         lr: 0.0012
-        weight_decay: 0.4
       scheduler:
         name: 1cycle
         update: batch
@@ -113,14 +112,8 @@ data:
         padding_mode: reflect
     - name: Normalize
       params:
-        mean:
-          - 0.491
-          - 0.482
-          - 0.447
-        std:
-          - 0.247
-          - 0.243
-          - 0.261
+        mean: cifar
+        std: cifar
     - name: RandomErasing
       params:
         p: 1.0
@@ -153,14 +146,8 @@ data:
         padding_mode: reflect
     - name: Normalize
       params:
-        mean:
-          - 0.491
-          - 0.482
-          - 0.447
-        std:
-          - 0.247
-          - 0.243
-          - 0.261
+        mean: cifar
+        std: cifar
     - name: RandomErasing
       params:
         p: 1.0
