@@ -31,3 +31,12 @@ LabelSmoothing
 Balanced dataset
 jitter
 affine
+
+SWA on different models
+
+ensemble different models
+ensemble different input sizes
+
+resnet50
+resnext50
+efficientnetB5 noisy student
