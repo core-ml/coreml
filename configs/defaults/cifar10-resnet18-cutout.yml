@@ -13,13 +13,13 @@ model:
     optimizer:
       name: AdamW
       args:
-        lr: 0.00012
-        weight_decay: 0.4
+        lr: 0.0012
+        weight_decay: 0.04
       scheduler:
         name: 1cycle
         update: batch
         params:
-            max_lr: 0.003
+            max_lr: 0.03
             epochs: 35
             steps_per_epoch: 98
             pct_start: 0.3
@@ -58,7 +58,7 @@ network:
     name: neural_net
     params:
         config:
-        - name: resnet18
+        - name: resnet34
           params:
             in_channels: 3
             pretrained: true
@@ -115,6 +115,15 @@ data:
       params:
         mean: cifar
         std: cifar
+    - name: RandomErasing
+      params:
+        p: 1.0
+        ratio:
+          - 1.
+          - 1.
+        scale:
+          - 0.1
+          - 0.1
 
     test:
     - name: Permute
@@ -140,6 +149,15 @@ data:
       params:
         mean: cifar
         std: cifar
+    - name: RandomErasing
+      params:
+        p: 1.0
+        ratio:
+          - 1.
+          - 1.
+        scale:
+          - 0.1
+          - 0.1
 
   dataset:
     name: classification_dataset
