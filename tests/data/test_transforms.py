@@ -447,6 +447,25 @@ class DataProcessorTestCase(unittest.TestCase):
         t_dummy = processor(dummy)
         assert_array_almost_equal(t_dummy, expected, decimal=4)
 
+    def test_random_crop_2d(self):
+        """Tests RandomCrop on 2D input"""
+        dummy = torch.rand((3, 3))  # 3 x 3
+
+        config = [
+            {
+                'name': 'RandomCrop',
+                'params': {
+                    'size': [4, 4],
+                    'padding': 2,
+                    'padding_mode': 'reflect'
+                }
+            }
+        ]
+        processor = DataProcessor(config)
+
+        t_dummy = processor(dummy)
+        self.assertEqual(t_dummy.shape, (4, 4))
+
 
 if __name__ == "__main__":
     unittest.main()

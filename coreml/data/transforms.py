@@ -128,6 +128,45 @@ class Resize(KorniaBase):
             kornia.geometry.transform.affwarp.Resize, size=size)
 
 
+class RandomCrop(KorniaBase):
+    """Randomly crop the given input to a particular size
+
+    Wrapper for `kornia.augmentation.RandomCrop`.
+
+    Example:
+    >>> signal = load_signal()
+    >>> signal.shape
+    (156, 156)
+    >>> t_signal = RandomCrop((128, 128))(signal)
+    >>> t_signal.shape
+    (128, 128)
+
+    :param size: desired size after resizing
+    :type size: Union[int, Tuple[int, int]]
+    :param padding: Optional padding on each border
+            of the image. Default is None, i.e no padding. If a sequence of
+            length 4 is provided, it is used to pad left, top, right,
+            bottom borders respectively. If a sequence of length 2 is provided,
+            it is used to pad left/right, top/bottom borders, respectively.
+    :type padding: Optional[Union[int, Tuple[int, int], Tuple[int, int, int, int]]]
+    :param fill: Pixel fill value for constant fill. If a tuple of
+            length 3, it is used to fill R, G, B channels respectively.
+            This value is only used when the padding_mode is constant.
+            defaults to 0.
+    :type fill: int
+    :param padding_mode: Type of padding. Should be: constant, edge, reflect or
+            symmetric. defaults to constant
+    :type padding_mode: str
+    """
+    def __init__(
+            self, size: Tuple[int, int],
+            padding: Optional[Union[int, Tuple[int, int], Tuple[int, int, int, int]]] = None,
+            fill: int = 0, padding_mode: str = 'constant'):
+        super(RandomCrop, self).__init__(
+            kornia.augmentation.RandomCrop, size=size, padding=padding,
+            fill=fill, padding_mode=padding_mode)
+
+
 class RandomAffine(KorniaBase):
     """Random affine transformation of the image keeping center invariant
 
@@ -336,6 +375,7 @@ transform_factory.register_builder('RandomVerticalFlip', RandomVerticalFlip)
 transform_factory.register_builder(
     'RandomHorizontalFlip', RandomHorizontalFlip)
 transform_factory.register_builder('RandomErasing', RandomErasing)
+transform_factory.register_builder('RandomCrop', RandomCrop)
 
 
 class ClassificationAnnotationTransform:
