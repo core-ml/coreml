@@ -65,6 +65,12 @@ def evaluate(config, mode, use_wandb, ignore_cache, n_tta):
     # take the mean across several TTA runs
     predictions = all_predictions.mean(-1)
 
+    # calculate the metrics on the TTA predictions
+    metrics = model.compute_epoch_metrics(
+        predictions, results['targets'], as_logits=False)
+
+    print(f'TTA auc: {metrics["auc-roc"]}')
+
     # get the file names
     names = [splitext(basename(item.path))[0] for item in results['items']]
 

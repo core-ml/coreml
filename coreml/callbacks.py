@@ -54,7 +54,7 @@ class ModelCheckpoint(object):
             fname = 'best_ckpt.pth.tar'
         else:
             available_ckpts = natsorted(
-                glob(join(self.ckpt_dir, '[0-9]*_ckpt.pth.tar')))
+                glob(join(self.ckpt_dir, '*_ckpt.pth.tar')))
             if epoch == -1:
                 fname = basename(available_ckpts[-1])
             else:
