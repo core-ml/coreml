@@ -319,9 +319,21 @@ class RandomErasing(KorniaBase):
     def __init__(
             self, p: float = 0.5, scale: Tuple[float, float] = (0.02, 0.33),
             ratio: Tuple[float, float] = (0.3, 3.3)):
+        self._check_params(scale, ratio)
         super(RandomErasing, self).__init__(
             kornia.augmentation.RandomErasing, p=p,
             scale=scale, ratio=ratio)
+
+    @staticmethod
+    def _check_params(scale, ratio):
+        assert isinstance(scale, (list, tuple))
+        assert isinstance(ratio, (list, tuple))
+
+        for r in ratio:
+            assert isinstance(r, float), "Requires float ratio value"
+
+        for s in scale:
+            assert isinstance(s, float), "Requires float scale value"
 
 
 class Compose:
