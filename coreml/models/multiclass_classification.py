@@ -37,32 +37,6 @@ class MultiClassClassificationModel(BinaryClassificationModel):
     :param config: Config object
     :type config: Config
     """
-    def calculate_instance_loss(
-            self, predictions: torch.FloatTensor, targets: torch.LongTensor,
-            mode: str, as_numpy: bool = False) -> dict:
-        """Calculate loss per instance in a batch
-
-        :param predictions: Predictions (Predicted)
-        :type predictions: torch.FloatTensor
-        :param targets: Targets (Ground Truth)
-        :type targets: torch.LongTensor
-        :param mode: train/val/test
-        :type mode: str
-        :param as_numpy: flag to decide whether to return losses as np.ndarray
-        :type as_numpy: bool
-
-        :return: dict of losses with list of loss values per instance
-        """
-        loss_config = self.model_config.get('loss')[mode]
-        criterion = loss_factory.create(
-            loss_config['name'], **loss_config['params'])
-        loss = criterion(predictions, targets)
-
-        if as_numpy:
-            loss = loss.cpu().numpy()
-
-        return {'loss': loss}
-
     def get_eval_params(self, epoch_data: dict) -> Tuple:
         """Get evaluation params by optimizing on the given data
 
