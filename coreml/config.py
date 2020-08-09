@@ -59,9 +59,13 @@ class Config:
     @staticmethod
     def _set_defaults(params: Dict):
         """Validates parameter values"""
+        # set default train and val modes
+        params['train_mode'] = params.get('train_mode', 'train')
+        params['val_mode'] = params.get('val_mode', 'val')
+
         # metrics
-        params['metrics_to_track'] = [
-            'auc-roc', 'precision', 'specificity', 'recall']
+        params['metrics_to_track'] = params.get('metrics_to_track', [
+            'auc-roc', 'precision', 'specificity', 'recall'])
         params['allow_val_change'] = params.get('allow_val_change', False)
 
         # sampler

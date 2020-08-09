@@ -1,4 +1,4 @@
-"""Defines the base classes to be extended by specific types of models."""
+"""Defines the binary classification model"""
 import sys
 from os import makedirs
 from os.path import join, exists, dirname, basename, splitext
@@ -252,37 +252,6 @@ class BinaryClassificationModel(Model):
         makedirs(dirname(save_path), exist_ok=True)
         torch.save(instance_values, save_path)
 
-    def get_subset_data(
-            self, epoch_data: dict, indices: List[int],
-            instance_losses: defaultdict = None) -> Tuple:
-        """Get data for the subset specified by the indices
-
-        :param epoch_data: dictionary of various values in the epoch
-        :type epoch_data: dict
-        :param indices: list of integers specifying the subset to select
-        :type indices: List[int]
-        :param instance_losses: losses per instance in the batch
-        :type instance_losses: defaultdict, defaults to None
-
-        :return: dict of epoch_data at the given indices
-        """
-        subset_data = dict()
-        _epoch_data = dict()
-        for key in epoch_data:
-            _epoch_data[key] = epoch_data[key][indices]
-        subset_data['epoch_data'] = _epoch_data
-
-        if instance_losses is not None:
-            # get the instance losses for the subset
-            subset_data['instance_losses'] = dict()
-            for loss_name, loss_value in instance_losses.items():
-                subset_data['instance_losses'][loss_name] = loss_value[indices]
-
-            # calculate the subset losses and metrics
-            subset_data['epoch_losses'] = self.calculate_epoch_loss(
-                subset_data['instance_losses'])
-        return subset_data
-
     def get_eval_params(self, epoch_data: dict) -> Tuple:
         """Get evaluation params by optimizing on the given data
 
@@ -453,20 +422,18 @@ class BinaryClassificationModel(Model):
         learning_rates.append(self.optimizer.param_groups[0]['lr'])
         return learning_rates
 
-    def process_batch(self, batch: Any, mode: str = None) -> Tuple[Any, Any]:
+    def process_batch(self, batch: Any) -> Tuple[Any, Any]:
         """Returns the predictions and targets for each batch
 
         :param batch: one batch of data containing inputs and targets
         :type batch: Any
-        :param mode: train/val/test mode
-        :type mode: str
 
         :return: dict containing predictions and targets
         """
         inputs = batch['signals'].to(self.device)
         labels = batch['labels'].to(self.device)
 
-        if mode is not None and 'train' in mode:
+        if self.network.training:
             predictions = self.network(inputs)
         else:
             with torch.no_grad():

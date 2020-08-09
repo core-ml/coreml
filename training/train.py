@@ -27,8 +27,8 @@ def main(args):
     logging.info(args)
 
     if args.wandb:
-        os.environ['WANDB_ENTITY'] = args.entity
-        os.environ['WANDB_PROJECT'] = args.project
+        os.environ['WANDB_ENTITY'] = config.entity
+        os.environ['WANDB_PROJECT'] = config.project
         os.environ['WANDB_DIR'] = dirname(config.checkpoint_dir)
 
         run_name = args.version.replace('/', '_')
@@ -59,10 +59,6 @@ if __name__ == '__main__':
                         help='experiment ID in wandb')
     parser.add_argument('--wandb', action='store_false',
                         help='whether to ignore using wandb')
-    parser.add_argument('-e', '--entity', type=str,
-                        help='wandb user/org name')
-    parser.add_argument('-p', '--project', type=str,
-                        help='wandb project name')
     parser.add_argument('--seed', type=int, default=42,
                         help='seed for the experiment')
     args = parser.parse_args()

@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 from coreml.utils.io import save_yml
 
 # load train split
-train = CIFAR10('/data/CIFAR10/raw',  download=True)
+train = CIFAR10('/data/CIFAR10/raw', download=True)
 
 # load test split
 test = CIFAR10('/data/CIFAR10/raw', train=False, download=True)
@@ -44,9 +44,12 @@ for index in tqdm(range(len(all_images)), desc='Saving images'):
         cv2.imwrite(image_path, image[:, :, ::-1])
 
 splits = ['train'] * len(train.data) + ['test'] * len(test.data)
-labels = [{'classification': [all_targets[index].tolist()]} for index in range(len(all_targets))]
+labels = [{
+    'classification': [all_targets[index].tolist()]
+    } for index in range(len(all_targets))]
 
-annotation = pd.DataFrame({'path': image_paths, 'label': labels, 'split': splits})
+annotation = pd.DataFrame({
+    'path': image_paths, 'label': labels, 'split': splits})
 
 # save annotation data
 annotation.to_csv(annotation_path, index=False)
@@ -77,9 +80,16 @@ version['train'] = {
     'label': train_labels
 }
 
+# val split
 version['val'] = {
     'file': val_image_paths,
     'label': val_labels
+}
+
+# train + val split
+version['train-val'] = {
+    'file': train_image_paths + val_image_paths,
+    'label': train_labels + val_labels
 }
 
 # test split
@@ -91,6 +101,7 @@ version['test'] = {
 # check shapes
 assert len(version['train']['file']) == 40000
 assert len(version['val']['file']) == 10000
+assert len(version['train-val']['file']) == 50000
 assert len(version['test']['file']) == 10000
 
 # check label types
@@ -152,9 +163,16 @@ version['train'] = {
     'label': train_labels
 }
 
+# val split
 version['val'] = {
     'file': val_image_paths,
     'label': val_labels
+}
+
+# train + val split
+version['train-val'] = {
+    'file': train_image_paths + val_image_paths,
+    'label': train_labels + val_labels
 }
 
 # test split

@@ -16,7 +16,6 @@ from coreml.utils.logger import color
 from coreml.data.utils import read_dataset_from_config
 from coreml.data.dataloader import get_dataloader
 from coreml.callbacks import ModelCheckpoint
-from coreml.models.utils import get_subsets
 
 
 class Estimator(ABC):
@@ -244,23 +243,6 @@ class Model(Estimator):
         pass
 
     @abstractmethod
-    def get_subset_data(
-            self, epoch_data: dict, indices: List[int],
-            instance_losses: defaultdict = None) -> Tuple:
-        """Get data for the subset specified by the indices
-
-        :param epoch_data: dictionary of various values in the epoch
-        :type epoch_data: dict
-        :param indices: list of integers specifying the subset to select
-        :type indices: List[int]
-        :param instance_losses: losses per instance in the batch
-        :type instance_losses: defaultdict, defaults to None
-
-        :return: dict of epoch_data at the given indices
-        """
-        pass
-
-    @abstractmethod
     def get_eval_params(self, epoch_data: dict) -> Tuple:
         """Get evaluation params by optimizing on the given data
 
@@ -372,7 +354,7 @@ class Model(Estimator):
         for batchID, batch in enumerate(iterator):
             # process one batch to compute and return the inputs, predictions,
             # ground truth and item in the batch
-            batch_data = self.process_batch(batch, mode)
+            batch_data = self.process_batch(batch)
 
             # calculate loss per instance in the batch
             _instance_losses = self.calculate_instance_loss(
@@ -387,8 +369,8 @@ class Model(Estimator):
                 # log batch summary
                 self.log_batch_summary(iterator, mode, _batch_losses)
 
-                # update network weights
-                if 'train' in mode:
+                # update network weights in training mode
+                if training:
                     self.update_network_params(_batch_losses)
 
             # append batch loss to the list of losses for the epoch
@@ -403,7 +385,7 @@ class Model(Estimator):
 
             # update optimizer parameters using schedulers that operate
             # per batch like CyclicalLearningRate
-            if hasattr(self, 'update_freq') and 'batch' in self.update_freq and mode == 'train':
+            if hasattr(self, 'update_freq') and 'batch' in self.update_freq and training:
                 self.update_optimizer_params(_batch_losses, 'batch')
 
             # accumulate predictions, targets and items over the epoch
@@ -440,66 +422,24 @@ class Model(Estimator):
 
         logging.info('Computing metrics')
 
-        all_data = {
-            mode: {
-                'epoch_data': epoch_data
-            }
-        }
-
-        if hasattr(self, 'subsets_to_track'):
-            # track subsets if they exist for the current `mode`
-            for subset_mode, subset_paths in self.subsets_to_track[mode].items():
-                # match each subset with the larger set using
-                # the corresponding IDs (paths)
-                subset_indices = [
-                    index for index, item in enumerate(epoch_data['items'])
-                    if item.path in subset_paths]
-
-                # get the subset data
-                subset_data = self.get_subset_data(
-                    epoch_data, subset_indices, instance_losses)
-
-                all_data[subset_mode] = subset_data
-
-        maximize_mode = self.model_config['eval'].get('maximize_mode', mode)
-        maximize_mode = maximize_mode if maximize_mode in all_data else mode
-        logging.info(
-            'Finding optimal evaluation params based on: {}'.format(
-                maximize_mode))
-
-        eval_params = self.get_eval_params(
-            all_data[maximize_mode]['epoch_data'])
-
-        # remove mode from all_data
-        all_data.pop(mode, None)
+        # get parameters for evaluation like the optimal
+        # threshold for classification
+        eval_params = self.get_eval_params(epoch_data)
 
         # calculate metrics for the epoch
         logging.info('Computing metrics')
-
         metrics = self.compute_epoch_metrics(
             epoch_data['predictions'], epoch_data['targets'],
             **eval_params)
 
         if log_summary:
             logging.info('Logging epoch summary')
+
             # log losses, metrics and visualizations
             self.log_epoch_summary(
                 mode, epoch_losses, metrics, epoch_data,
                 learning_rates, batch_losses, instance_losses,
                 use_wandb)
-
-            for subset_mode, subset_data in all_data.items():
-                # calculate subset metrics
-                subset_metrics = self.compute_epoch_metrics(
-                    subset_data['epoch_data']['predictions'],
-                    subset_data['epoch_data']['targets'],
-                    **eval_params)
-
-                # log subset values
-                self.log_epoch_summary(
-                    subset_mode, subset_data['epoch_losses'],
-                    subset_metrics, subset_data['epoch_data'],
-                    None, None, subset_data['instance_losses'], use_wandb)
 
         results = dict()
         results.update(epoch_losses)
@@ -531,7 +471,7 @@ class Model(Estimator):
             # for the train set. Else set it to True
             shuffle = not overfit_batch
             train_dataloader, _ = get_dataloader(
-                self.data_config, 'train',
+                self.data_config, self.config.train_mode,
                 self.model_config['batch_size'],
                 num_workers=self.config.num_workers,
                 shuffle=shuffle,
@@ -540,7 +480,7 @@ class Model(Estimator):
         # ignore val operations when overfitting on a batch
         if not overfit_batch:
             val_dataloader, _ = get_dataloader(
-                self.data_config, 'val',
+                self.data_config, self.config.val_mode,
                 self.model_config['batch_size'],
                 num_workers=self.config.num_workers,
                 shuffle=False,
@@ -548,25 +488,15 @@ class Model(Estimator):
         else:
             logging.info(color('Overfitting a single batch', 'blue'))
 
-        # setup subset trackers
-        self.subsets_to_track = defaultdict()
-        for mode in self.model_config['subset_tracker']:
-            # each mode (train/val) can have multiple subsets that we
-            # want to track
-            self.subsets_to_track[mode] = get_subsets(
-                self.model_config['subset_tracker'][mode])
-
         # track gradients and weights in wandb
         if use_wandb:
             self.network.watch()
-
-        best_metric_values = None
 
         for epochID in range(self.model_config['epochs']):
             if not debug:
                 # train epoch
                 train_results = self.process_epoch(
-                    train_dataloader, 'train', training=True,
+                    train_dataloader, self.config.train_mode, training=True,
                     use_wandb=use_wandb,
                     overfit_batch=overfit_batch)
 
@@ -574,7 +504,8 @@ class Model(Estimator):
             if not overfit_batch:
                 # val epoch
                 val_results = self.process_epoch(
-                    val_dataloader, 'val', training=False, use_wandb=use_wandb)
+                    val_dataloader, self.config.val_mode,
+                    training=False, use_wandb=use_wandb)
 
                 # save best model
                 self.save(val_results, use_wandb=use_wandb)
