@@ -32,6 +32,14 @@ def evaluate(config, mode, use_wandb, ignore_cache, n_tta):
     """
     model = model_factory.create(config.model['name'], **{'config': config})
     logging.info(color(f'Evaluating on mode: {mode}'))
+
+    # reset sampler to default
+    config.data['sampler'].update({
+        mode: {
+            'name': 'default'
+        }
+    })
+
     dataloader, _ = get_dataloader(
         config.data, mode,
         config.model['batch_size'],

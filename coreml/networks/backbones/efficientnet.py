@@ -20,7 +20,7 @@ class EfficientNet(torch.nn.Module):
             return_features: bool = False):
         super(EfficientNet, self).__init__()
         self.net = getattr(efficientnet, variant)(
-            num_classes=num_classes, in_chans=in_channels)
+            pretrained=True, num_classes=num_classes, in_chans=in_channels)
         self.return_features = return_features
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:

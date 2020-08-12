@@ -99,12 +99,12 @@ class ModelCheckpoint(object):
             info = '[{}] {} did not improve from {}'.format(
                 color('Saving regular model', 'red'), self.monitor, old_value)
 
-        if not ((epoch_counter + 1) % self.period):
-            save_status.update({
-                'save': True,
-                'path': join(self.ckpt_dir, '{}_ckpt.pth.tar'.format(
-                    epoch_counter)),
-                'info': info
-            })
+            if not ((epoch_counter + 1) % self.period):
+                save_status.update({
+                    'save': True,
+                    'path': join(self.ckpt_dir, '{}_ckpt.pth.tar'.format(
+                        epoch_counter)),
+                    'info': info
+                })
 
         return save_status
