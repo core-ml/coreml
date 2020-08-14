@@ -399,7 +399,7 @@ class BinaryClassificationModel(Model):
                 self.config.paths['OUT_DIR'], load_config['version'],
                 'checkpoints')
             self.load_path = self.checkpoint.get_saved_checkpoint_path(
-                load_config['load_best'], load_config['epoch'])
+                load_dir, load_config['load_best'], load_config['epoch'])
 
             logging.info(color("=> Loading model weights from {}".format(
                 self.load_path)))

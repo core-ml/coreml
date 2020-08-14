@@ -85,7 +85,8 @@ class BinaryClassificationModelTestCase(unittest.TestCase):
         # checking if the loaded params are indeed the same as saved
         network_state = classifier.network.get_state_dict()
         load_path = classifier.checkpoint.get_saved_checkpoint_path(
-            load_cfg['load_best'], load_cfg['epoch'])
+            classifier.checkpoint_dir, load_cfg['load_best'],
+            load_cfg['epoch'])
         saved_state = torch.load(load_path)['network']
 
         for key in tqdm(network_state.keys(), desc='Testing params'):
@@ -115,7 +116,8 @@ class BinaryClassificationModelTestCase(unittest.TestCase):
         # checking if the loaded params are indeed the same as saved
         network_state = classifier.network.get_state_dict()
         load_path = classifier.checkpoint.get_saved_checkpoint_path(
-            load_cfg['load_best'], load_cfg['epoch'])
+            classifier.checkpoint_dir, load_cfg['load_best'],
+            load_cfg['epoch'])
         self.assertIn('best_ckpt', load_path)
         saved_state = torch.load(load_path)['network']
 

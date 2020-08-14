@@ -37,10 +37,12 @@ class ModelCheckpoint(object):
         }
 
     def get_saved_checkpoint_path(
-            self, load_best: bool = False,
+            self, load_dir: str, load_best: bool = False,
             epoch: int = -1) -> str:
         """Returns the filename of saved checkpoint for a given epoch.
 
+        :param load_dir: dir from where to load checkpoints
+        :type load_dir: str
         :param load_best: whether to load best checkpoint or not, defaults to
             False
         :type load_best: bool, optional
@@ -54,13 +56,13 @@ class ModelCheckpoint(object):
             fname = 'best_ckpt.pth.tar'
         else:
             available_ckpts = natsorted(
-                glob(join(self.ckpt_dir, '*_ckpt.pth.tar')))
+                glob(join(load_dir, '*_ckpt.pth.tar')))
             if epoch == -1:
                 fname = basename(available_ckpts[-1])
             else:
                 fname = '{}_ckpt.pth.tar'.format(epoch)
 
-        return join(self.ckpt_dir, fname)
+        return join(load_dir, fname)
 
     def update_best_metric(
             self, epoch_counter: int, epoch_metric_dict: Dict) -> Dict:
