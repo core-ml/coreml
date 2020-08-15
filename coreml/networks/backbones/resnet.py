@@ -2,8 +2,10 @@
 import torch
 import torch.nn as nn
 from torchvision.models.utils import load_state_dict_from_url
+from timm.models import resnet
 from coreml.networks.backbones.utils import _correct_state_dict
 from coreml.networks.activations import factory as activation_factory
+from coreml.networks.backbones.base import BaseTimmModel
 
 
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
@@ -219,6 +221,27 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         return self._forward_impl(x)
+
+
+class SeResnet(BaseTimmModel):
+    """Seresnet with all its variants
+
+    :param variant: specific architecture to use (18, 50, 101, etc.)
+    :param variant: str
+    :param num_classes: number of classes to be predicted
+    :param num_classes: int
+    :param in_channels: number of input channels, defaults to 3
+    :param in_channels: int, optional
+    :param return_features: whether to only return features during inference,
+        defaults to False
+    :param return_features: bool, optional
+    """
+    def __init__(
+            self, variant: str, num_classes: int, in_channels: int = 3,
+            return_features: bool = False):
+        method = getattr(resnet, variant)
+        super(SeResnet, self).__init__(
+            method, variant, num_classes, in_channels, return_features)
 
 
 def _resnet(arch, block, layers, in_channels, pretrained, progress, **kwargs):

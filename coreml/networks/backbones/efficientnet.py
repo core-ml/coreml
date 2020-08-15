@@ -1,8 +1,8 @@
-import torch
 from timm.models import efficientnet
+from coreml.networks.backbones.base import BaseTimmModel
 
 
-class EfficientNet(torch.nn.Module):
+class EfficientNet(BaseTimmModel):
     """EfficientNet with all its variants
 
     :param variant: specific architecture to use (b0-b7)
@@ -18,13 +18,6 @@ class EfficientNet(torch.nn.Module):
     def __init__(
             self, variant: str, num_classes: int, in_channels: int = 3,
             return_features: bool = False):
-        super(EfficientNet, self).__init__()
-        self.net = getattr(efficientnet, variant)(
-            pretrained=True, num_classes=num_classes, in_chans=in_channels)
-        self.return_features = return_features
-
-    def forward(self, input: torch.Tensor) -> torch.Tensor:
-        if self.return_features:
-            return self.net.forward_features(input)
-
-        return self.net(input)
+        method = getattr(efficientnet, variant)
+        super(EfficientNet, self).__init__(
+            method, variant, num_classes, in_channels, return_features)

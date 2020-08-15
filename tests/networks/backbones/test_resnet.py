@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import unittest
 from coreml.networks.backbones.resnet import resnet18, resnet34, resnet50, \
-    resnet101, resnet152, resnext50_32x4d, resnext101_32x8d
+    resnet101, resnet152, resnext50_32x4d, resnext101_32x8d, SeResnet
 
 
 class ResnetTestCase(unittest.TestCase):
@@ -54,6 +54,14 @@ class ResnetTestCase(unittest.TestCase):
         """Test resnext101_32x8d"""
         dummy = torch.empty((1, 3, 224, 224))
         net = resnext101_32x8d(pretrained=True)
+        out = net(dummy)
+        self.assertEqual(out.shape, (1, 2048, 7, 7))
+
+    def test_seresnet50(self):
+        """Test seresnet-50"""
+        dummy = torch.empty((1, 3, 224, 224))
+        net = SeResnet(
+            variant='seresnet50', num_classes=1, return_features=True)
         out = net(dummy)
         self.assertEqual(out.shape, (1, 2048, 7, 7))
 

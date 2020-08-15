@@ -11,7 +11,7 @@ from torch.nn import Conv2d, Linear, BatchNorm2d, ReLU,\
     GroupNorm, PReLU, Module, Softmax
 from coreml.factory import Factory
 from coreml.networks.backbones.resnet import resnet18, resnet34, resnet50, \
-    resnet101, resnet152, resnext50_32x4d, resnext101_32x8d
+    resnet101, resnet152, resnext50_32x4d, resnext101_32x8d, SeResnet
 from coreml.networks.backbones.vgg import vgg11, vgg13, vgg16, vgg19, \
     vgg11_bn, vgg13_bn, vgg16_bn, vgg19_bn
 from coreml.networks.backbones.resnet_swsl import resnext50_32x4d_swsl
@@ -59,3 +59,4 @@ factory.register_builder('vgg19_bn', vgg19_bn)
 factory.register_builder('Swish', Swish)
 factory.register_builder('efficientnet', EfficientNet)
 factory.register_builder('resnext50_32x4d_swsl', resnext50_32x4d_swsl)
+factory.register_builder('seresnet', SeResnet)
