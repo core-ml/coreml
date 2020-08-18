@@ -102,6 +102,9 @@ def main(args):
     set_logger(join(config.log_dir, 'eval.log'))
     logging.info(args)
 
+    if args.bs is not None:
+        config.model['batch_size'] = args.bs
+
     # add checkpoint loading values
     load_epoch = args.epoch
     load_best = args.best
@@ -140,6 +143,8 @@ if __name__ == '__main__':
                         help='specifies the checkpoint epoch to load')
     parser.add_argument('-b', '--best', action='store_true',
                         help='whether to load the best saved checkpoint')
+    parser.add_argument('--bs', default=None, type=int,
+                        help='batch size to use')
     parser.add_argument('-i', '--ignore-cache', action='store_true',
                         help='whether to ignore cache')
     parser.add_argument('--wandb', action='store_false',
