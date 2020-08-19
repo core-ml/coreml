@@ -59,6 +59,7 @@ class Model(Estimator):
             # imports needed for TPU
             import torch_xla.core.xla_model as xm
             import torch_xla.distributed.parallel_loader as pl
+            global pl
             self.device = xm.xla_device()
         else:
             self.device = 'cpu'
