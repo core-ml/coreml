@@ -6,6 +6,9 @@ project: cifar10
 train_mode: train-val
 val_mode: test
 
+device:
+  name: cuda
+
 model:
     name: multiclass-classification
     batch_size: 512

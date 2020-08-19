@@ -51,10 +51,15 @@ class Model(Estimator):
         super(Model, self).__init__(config)
         self.network_config = self.config.network
 
-        # set default tensor based on device
-        if torch.cuda.is_available():
+        # set device
+        if self.config.device['name'] == 'cuda' and torch.cuda.is_available():
             self.device = 'cuda'
             cudnn.benchmark = True
+        elif self.config.device['name'] == 'tpu':
+            # imports needed for TPU
+            import torch_xla.core.xla_model as xm
+            import torch_xla.distributed.parallel_loader as pl
+            self.device = xm.xla_device()
         else:
             self.device = 'cpu'
 
@@ -477,6 +482,12 @@ class Model(Estimator):
                 shuffle=shuffle,
                 drop_last=False)
 
+            # TPU multi-core
+            if self.device not in ['cuda', 'cpu']:
+                train_dataloader = pl.ParallelLoader(
+                    train_dataloader, [self.device]).per_device_loader(
+                    self.device)
+
         # ignore val operations when overfitting on a batch
         if not overfit_batch:
             val_dataloader, _ = get_dataloader(
@@ -485,6 +496,12 @@ class Model(Estimator):
                 num_workers=self.config.num_workers,
                 shuffle=False,
                 drop_last=False)
+
+            # TPU multi-core
+            if self.device not in ['cuda', 'cpu']:
+                val_dataloader = pl.ParallelLoader(
+                    val_dataloader, [self.device]).per_device_loader(
+                    self.device)
         else:
             logging.info(color('Overfitting a single batch', 'blue'))
 

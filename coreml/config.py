@@ -59,6 +59,9 @@ class Config:
     @staticmethod
     def _set_defaults(params: Dict):
         """Validates parameter values"""
+        # set default device if not set
+        params['device'] = params.get('device', {'name': 'cuda'})
+
         # set default train and val modes
         params['train_mode'] = params.get('train_mode', 'train')
         params['val_mode'] = params.get('val_mode', 'val')

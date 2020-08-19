@@ -145,7 +145,13 @@ class BinaryClassificationModel(Model):
         """
         self.optimizer.zero_grad()
         losses['loss'].backward()
-        self.optimizer.step()
+
+        if self.device in ['cuda', 'cpu']:
+            self.optimizer.step()
+        else:
+            # TPU multi-core - hence, barrier=True is missing
+            import torch_xla.core.xla_model as xm
+            xm.optimizer_step(self.optimizer)
 
     def update_optimizer_params(self, values: dict, update_freq: str):
         """Update optimization parameters like learning rate etc.

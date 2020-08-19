@@ -19,6 +19,10 @@ def train(config, debug, overfit_batch, use_wandb):
     model.fit(debug=debug, overfit_batch=overfit_batch, use_wandb=use_wandb)
 
 
+def train_mp_fn(rank, **kwargs):
+    train(**kwargs)
+
+
 def main(args):
     seed_everything(args.seed)
     config = Config(args.version)
@@ -40,7 +44,20 @@ def main(args):
             allow_val_change=config.allow_val_change)
 
     config.num_workers = args.num_workers
-    train(config, args.debug, args.overfit_batch, args.wandb)
+    args = {
+        'config': config,
+        'debug': args.debug,
+        'overfit_batch': args.overfit_batch,
+        'use_wandb': args.wandb
+    }
+
+    if config.device['name'] == 'tpu':
+        import torch_xla.distributed.xla_multiprocessing as xmp
+        xmp.spawn(
+            train_mp_fn, args=(args,), nprocs=config.device['params']['num_cores'],
+            start_method='fork')
+    else:
+        train(**args)
 
 
 if __name__ == '__main__':

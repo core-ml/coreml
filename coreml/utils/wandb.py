@@ -145,7 +145,6 @@ def get_images(
 
         caption = 'Pred: {} GT: {}'.format(prediction, target)
 
-        # import ipdb; ipdb.set_trace()
         images.append(
             wandb.Image(torch.Tensor(_input), caption=caption))
 
