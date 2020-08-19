@@ -29,7 +29,6 @@ natsort==7.0.1
 nbconvert==5.6.1
 nbformat==4.4.0
 numpy==1.18.2
-nvidia-dali==0.17.0
 pandas==1.0.3
 Pillow==7.1.1
 plotly==4.6.0
