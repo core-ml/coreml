@@ -2,6 +2,6 @@
 from coreml.factory import Factory
 from coreml.data.classification import ClassificationDatasetBuilder
 
-factory = Factory()
-factory.register_builder(
+dataset_factory = Factory()
+dataset_factory.register_builder(
     "classification_dataset", ClassificationDatasetBuilder())

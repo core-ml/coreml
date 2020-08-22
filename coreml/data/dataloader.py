@@ -7,7 +7,7 @@ from typing import Tuple, Dict, List
 import torch
 import numpy as np
 from torch.utils.data import DataLoader, Dataset
-from coreml.data import factory as dataset_factory
+from coreml.data import dataset_factory
 from coreml.data.sampler import sampler_factory
 from coreml.data.transforms import DataProcessor, annotation_factory
 from coreml.utils.logger import color
@@ -44,8 +44,8 @@ def classification_collate(batch: Tuple[Dict]) -> Dict:
 def get_dataloader(
         cfg: Dict, mode: str, batch_size: int,
         num_workers: int = 10, shuffle: bool = True, drop_last: bool = True
-        ) -> Tuple[DataLoader, Dataset]:
-    """Creates the DataLoader and Dataset objects
+        ) -> DataLoader:
+    """Creates the DataLoader
 
     :param cfg: config specifying the dataloader
     :type cfg: Dict
@@ -60,7 +60,7 @@ def get_dataloader(
     :param drop_last: whether to include last batch containing sample
         less than the batch size, defaults to True
     :type drop_last: bool, optional
-    :returns: A tuple containing the DataLoader and Dataset objects
+    :returns: the DataLoader object
     """
     logging.info(color('Creating {} DataLoader'.format(mode), 'blue'))
 
@@ -118,4 +118,4 @@ def get_dataloader(
         collate_fn=collate_fn,
         pin_memory=True)
 
-    return dataloader, dataset
+    return dataloader

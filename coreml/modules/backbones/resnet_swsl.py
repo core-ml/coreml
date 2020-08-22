@@ -2,7 +2,7 @@
 # modified to work as a backbone
 
 from torch.hub import load_state_dict_from_url
-from coreml.networks.backbones.resnet import ResNet, Bottleneck
+from coreml.modules.backbones.resnet import ResNet, Bottleneck
 
 
 semi_weakly_supervised_model_urls = {

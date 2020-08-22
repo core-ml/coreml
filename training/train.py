@@ -6,55 +6,62 @@ import os
 from os.path import join, dirname
 import multiprocessing as mp
 import wandb
+import pytorch_lightning as pl
 from coreml.config import Config
-from coreml.models import factory as model_factory
-from coreml.utils.logger import set_logger
-from training.utils import seed_everything
+from coreml.trainer import Trainer
 
 warnings.simplefilter('ignore')
 
+# TODO: notes in wandb
+# TODO: allow_val_change in wandb
+# TODO: on fit end log best_model_path and best_model_score to summary wandb
 
-def train(config, debug, overfit_batch, use_wandb):
-    model = model_factory.create(config.model['name'], **{'config': config})
-    model.fit(debug=debug, overfit_batch=overfit_batch, use_wandb=use_wandb)
+
+# def train(config, debug, overfit_batch, use_wandb):
+    
+    # model.fit(debug=debug, overfit_batch=overfit_batch, use_wandb=use_wandb)
 
 
 def main(args):
-    seed_everything(args.seed)
+    pl.seed_everything(args.seed)
     config = Config(args.version)
 
-    set_logger(join(config.log_dir, 'train.log'))
-    logging.info(args)
+    config.trainer['num_workers'] = args.num_workers
+    trainer_args = vars(args)
 
+    # setup wandb
     if args.wandb:
-        os.environ['WANDB_ENTITY'] = config.entity
-        os.environ['WANDB_PROJECT'] = config.project
-        os.environ['WANDB_DIR'] = dirname(config.checkpoint_dir)
+        config.logger.update({
+            'name': args.version.replace('/', '_'),
+            'save_dir': dirname(config.checkpoint_dir),
+            'id': args.id,
+            'offline': args.wandb
+        })
+        logger = pl.loggers.WandbLogger(**config.logger)
+        trainer_args['logger'] = logger
 
-        run_name = args.version.replace('/', '_')
-        wandb.init(name=run_name, dir=dirname(config.checkpoint_dir),
-                   notes=config.description, resume=args.resume,
-                   id=args.id)
-        wandb.config.update(
-            config.__dict__,
-            allow_val_change=config.allow_val_change)
+    # remove redundant keys from args
+    keys_to_remove = ['version', 'num_workers', 'id', 'wandb', 'seed']
+    for key in keys_to_remove:
+        trainer_args.pop(key, None)
 
-    config.num_workers = args.num_workers
-    train(config, args.debug, args.overfit_batch, args.wandb)
+    # override default args with args set in config
+    trainer_args.update(config.trainer['params'])
+
+    # define trainer object
+    trainer = Trainer(config, **trainer_args)
+
+    # train the model
+    trainer.fit()
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Trains a model")
+    parser = pl.Trainer.add_argparse_args(parser)
     parser.add_argument('-v', '--version', required=True, type=str,
                         help='path to the experiment config file')
     parser.add_argument('-n', '--num_workers', default=mp.cpu_count(),
                         type=int, help='number of CPU workers to use')
-    parser.add_argument('--debug', action='store_true',
-                        help='specify where a debugging run')
-    parser.add_argument('-o', '--overfit-batch', action='store_true',
-                        help='specify whether the run is to test overfitting')
-    parser.add_argument('--resume', action='store_true',
-                        help='whether to resume experiment in wandb')
     parser.add_argument('--id', type=str, default=None,
                         help='experiment ID in wandb')
     parser.add_argument('--wandb', action='store_false',

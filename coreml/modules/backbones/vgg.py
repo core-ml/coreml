@@ -2,7 +2,7 @@
 import torch
 import torch.nn as nn
 from torchvision.models.utils import load_state_dict_from_url
-from coreml.networks.backbones.utils import _correct_state_dict
+from coreml.modules.backbones.utils import _correct_state_dict
 
 
 __all__ = [

@@ -3,9 +3,9 @@ import torch
 import torch.nn as nn
 from torchvision.models.utils import load_state_dict_from_url
 from timm.models import resnet
-from coreml.networks.backbones.utils import _correct_state_dict
-from coreml.networks.activations import factory as activation_factory
-from coreml.networks.backbones.base import BaseTimmModel
+from coreml.modules.backbones.utils import _correct_state_dict
+from coreml.modules.activations import factory as activation_factory
+from coreml.modules.backbones.base import BaseTimmModel
 
 
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',

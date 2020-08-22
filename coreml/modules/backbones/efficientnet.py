@@ -1,5 +1,5 @@
 from timm.models import efficientnet
-from coreml.networks.backbones.base import BaseTimmModel
+from coreml.modules.backbones.base import BaseTimmModel
 
 
 class EfficientNet(BaseTimmModel):

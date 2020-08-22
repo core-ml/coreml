@@ -60,40 +60,38 @@ class Config:
     def _set_defaults(params: Dict):
         """Validates parameter values"""
         # set default train and val modes
-        params['train_mode'] = params.get('train_mode', 'train')
-        params['val_mode'] = params.get('val_mode', 'val')
+        params['modes'] = params.get('modes', {
+            'train_mode': 'train',
+            'val_mode': 'val',
+            'test_mode': 'test'
+        })
+
+        # logger
+        params['logger'] = params.get('logger', {})
 
         # metrics
-        params['metrics_to_track'] = params.get('metrics_to_track', [
-            'auc-roc', 'precision', 'specificity', 'recall'])
-        params['allow_val_change'] = params.get('allow_val_change', False)
+        # params['metrics_to_track'] = params.get('metrics_to_track', [
+        #     'auc-roc', 'precision', 'specificity', 'recall'])
+        # params['allow_val_change'] = params.get('allow_val_change', False)
 
         # sampler
         params['data']['sampler'] = params['data'].get('sampler', {})
         params['data']['dataset']['params'] = params['data']['dataset'].get(
             'params', {})
 
-        # defaults for subset tracker
-        params['model']['subset_tracker'] = params['model'].get(
-            'subset_tracker', {})
-        params['model']['subset_tracker']['train'] = params['model'][
-            'subset_tracker'].get('train', {})
-        params['model']['subset_tracker']['val'] = params['model'][
-            'subset_tracker'].get('val', {})
-
         # defaults for loading checkpoints
-        if 'load' in params['model']:
-            load_config = params['model']['load']
-            load_config['resume_optimizer'] = load_config.get(
-                'resume_optimizer', False)
-            load_config['resume_epoch'] = load_config.get(
-                'resume_epoch', load_config['resume_optimizer'])
-            params['model']['load'] = load_config
+        # if 'load' in params['model']:
+        #     load_config = params['model']['load']
+        #     load_config['resume_optimizer'] = load_config.get(
+        #         'resume_optimizer', False)
+        #     load_config['resume_epoch'] = load_config.get(
+        #         'resume_epoch', load_config['resume_optimizer'])
+        #     params['model']['load'] = load_config
 
         # evaluation
-        params['model']['eval'] = params['model'].get('eval', {})
-        params['model']['eval']['maximize_metric'] = params['model']['eval'].get(
-            'maximize_metric', 'specificity')
+        # params['model']['eval'] = params['model'].get('eval', {})
+        # params['model']['eval']['maximize_metric'] = params['model']['eval'].get(
+        #     'maximize_metric', 'specificity')
 
         return params
 
@@ -102,27 +100,27 @@ class Config:
         """Validates parameter values"""
         assert 'description' in params
         assert 'data' in params
-        assert 'model' in params
-        assert 'loss' in params['model']
+        assert 'module' in params
+        assert 'loss' in params['module']['config']
 
-        if 'optimizer' in params['model'] and 'scheduler' in params['model']['optimizer']:
-            scheduler_config = params['model']['optimizer']['scheduler']
+        # if 'optimizer' in params['model'] and 'scheduler' in params['model']['optimizer']:
+        #     scheduler_config = params['model']['optimizer']['scheduler']
 
-            if scheduler_config['name'] == 'StepLR':
-                assert scheduler_config['update'] == 'epoch'
-                assert 'value' not in scheduler_config
-            if scheduler_config['name'] == 'MultiStepLR':
-                assert scheduler_config['update'] == 'epoch'
-                assert 'value' not in scheduler_config
-            elif scheduler_config['name'] == 'ReduceLRInPlateau':
-                assert scheduler_config['update'] == 'epoch'
-                assert 'value' in scheduler_config
-            elif scheduler_config['name'] == 'CyclicLR':
-                assert scheduler_config['update'] == 'batch'
-                assert 'value' not in scheduler_config
-            elif scheduler_config['name'] == '1cycle':
-                assert scheduler_config['update'] == 'batch'
-                assert 'value' not in scheduler_config
+        #     if scheduler_config['name'] == 'StepLR':
+        #         assert scheduler_config['update'] == 'epoch'
+        #         assert 'value' not in scheduler_config
+        #     if scheduler_config['name'] == 'MultiStepLR':
+        #         assert scheduler_config['update'] == 'epoch'
+        #         assert 'value' not in scheduler_config
+        #     elif scheduler_config['name'] == 'ReduceLRInPlateau':
+        #         assert scheduler_config['update'] == 'epoch'
+        #         assert 'value' in scheduler_config
+        #     elif scheduler_config['name'] == 'CyclicLR':
+        #         assert scheduler_config['update'] == 'batch'
+        #         assert 'value' not in scheduler_config
+        #     elif scheduler_config['name'] == '1cycle':
+        #         assert scheduler_config['update'] == 'batch'
+        #         assert 'value' not in scheduler_config
 
     def update_from_params(self, params: Dict):
         """Updates parameters from dict"""
