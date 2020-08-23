@@ -19,9 +19,7 @@ from coreml.optimization import optimizer_factory, scheduler_factory
 
 # TODO:
 # wandb-logger
-# model checkpoint
-# LR logger
-# writing everything in train.py
+# model checkpoint - load models
 # tests
 # check loading of checkpoints with matching keys but different shape
 
@@ -46,6 +44,8 @@ class NeuralNetworkModule(pl.LightningModule):
         self.train_mode = train_mode
         self.val_mode = val_mode
         self.test_mode = test_mode
+
+        # build and initialize the network
         self._build_network()
         self._init_network()
 
@@ -242,8 +242,8 @@ class NeuralNetworkModule(pl.LightningModule):
         if self.logger is not None:
             # ideally this should be self.global_step but lightning
             # calls self.logger without step (within trainer/evaluation_loop.py
-            # - __log_evaluation_epoch_metrics()) implicitly and that increments
-            # the experiment step by 1.
+            # - __log_evaluation_epoch_metrics()) implicitly and that
+            # increments the experiment step by 1.
             self.logger.experiment.log(logs, step=self.logger.experiment.step)
         return OrderedDict(epoch_outputs)
 
@@ -259,3 +259,9 @@ class NeuralNetworkModule(pl.LightningModule):
     def on_fit_start(self):
         # log gradients and model parameters
         self.watch()
+
+    # def on_fit_end(self):
+    #     import ipdb; ipdb.set_trace()
+
+    # def on_save_checkpoint(self, checkpoint):
+    #     import ipdb; ipdb.set_trace()

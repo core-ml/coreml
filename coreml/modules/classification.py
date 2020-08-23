@@ -1,13 +1,6 @@
 """Defines the class for feed-forward LightningModule."""
 from typing import Dict, Tuple, Any
-from collections import OrderedDict
-import logging
-from abc import abstractmethod
-
 import torch
-import torch.nn as nn
-import wandb
-import pytorch_lightning as pl 
 
 from coreml.modules.nn import NeuralNetworkModule
 from coreml.utils.loss import loss_factory
@@ -36,14 +29,14 @@ class BinaryClassificationModule(NeuralNetworkModule):
     :type test_mode: str, optional
     """
     def calculate_instance_loss(
-            self, predictions, targets, mode: str,
-            as_numpy: bool = False) -> dict:
+            self, predictions: torch.Tensor, targets: torch.Tensor,
+            mode: str, as_numpy: bool = False) -> dict:
         """Calculate loss per instance in a batch
 
         :param predictions: Predictions (Predicted)
-        :type predictions: Any
+        :type predictions: torch.Tensor
         :param targets: Targets (Ground Truth)
-        :type targets: Any
+        :type targets: torch.Tensor
         :param mode: train/val/test mode
         :type mode: str
         :param as_numpy: flag to decide whether to return losses as np.ndarray
@@ -66,4 +59,3 @@ class BinaryClassificationModule(NeuralNetworkModule):
             loss = loss.cpu().numpy()
 
         return {'loss': loss}
-

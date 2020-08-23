@@ -4,12 +4,12 @@ logger:
   project: test-lightning
 
 trainer:
-  batch_size: 8
-  epochs: 1
+  batch_size: 64
   params:
     gpus:
       - 0
-    row_log_interval: 1
+    max_epochs: 10
+    weights_summary: full
 
 module:
   name: binary-classification
@@ -43,12 +43,13 @@ module:
     classes:
       - 0
       - 1
-    save:
+    checkpoint:
       period: 1
-      monitor: val_loss
+      monitor: loss
       verbose: true
       mode: min
       save_weights_only: true
+      save_top_k: -1
     load:
       version: null
       epoch: -1

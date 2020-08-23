@@ -37,91 +37,6 @@ class BinaryClassificationModel(Model):
     :param config: Config object
     :type config: Config
     """
-    def __init__(self, config):
-        super(BinaryClassificationModel, self).__init__(config)
-        logging.info(color('Using loss functions:'))
-        logging.info(self.model_config.get('loss'))
-
-    def _setup_network(self):
-        """Setup the network which needs to be trained"""
-        logging.info(color("Building the network"))
-        self.network = network_factory.create(
-            self.network_config['name'], **self.network_config['params']).to(
-            self.device)
-
-    def _freeze_layers(self):
-        """Freeze layers based on config during training"""
-        logging.info(color('Freezing specified layers'))
-        self.network.freeze_layers()
-
-    def _setup_optimizers(self):
-        """Setup optimizers to be used while training"""
-        if 'optimizer' not in self.model_config:
-            return
-
-        logging.info(color("Setting up the optimizer ..."))
-        kwargs = self.model_config['optimizer']['args']
-        kwargs.update({'params': self.network.parameters()})
-        self.optimizer = optimizer_factory.create(
-            self.model_config['optimizer']['name'],
-            **kwargs)
-
-        if 'scheduler' in self.model_config['optimizer']:
-            scheduler_config = self.model_config['optimizer']['scheduler']
-            scheduler_config['params']['optimizer'] = self.optimizer
-            self.scheduler = scheduler_factory.create(
-                scheduler_config['name'],
-                **scheduler_config['params'])
-            self.update_freq = [scheduler_config['update']]
-
-            if 'value' in scheduler_config:
-                self.value_to_track = scheduler_config['value']
-
-    def calculate_instance_loss(
-            self, predictions: torch.FloatTensor, targets: torch.LongTensor,
-            mode: str, as_numpy: bool = False) -> dict:
-        """Calculate loss per instance in a batch
-
-        :param predictions: Predictions (Predicted)
-        :type predictions: torch.FloatTensor
-        :param targets: Targets (Ground Truth)
-        :type targets: torch.LongTensor
-        :param mode: train/val/test
-        :type mode: str
-        :param as_numpy: flag to decide whether to return losses as np.ndarray
-        :type as_numpy: bool
-
-        :return: dict of losses with list of loss values per instance
-        """
-        loss_config = self.model_config.get('loss')[mode]
-        criterion = loss_factory.create(
-            loss_config['name'], **loss_config['params'])
-
-        # correct data type to handle mismatch between
-        # CrossEntropyLoss and BCEWithLogitsLoss
-        if loss_config['name'] == 'cross-entropy':
-            targets = targets.long()
-
-        loss = criterion(predictions, targets)
-
-        if as_numpy:
-            loss = loss.cpu().numpy()
-
-        return {'loss': loss}
-
-    def calculate_batch_loss(self, instance_losses) -> dict:
-        """Calculate mean of each loss for the batch
-
-        :param batch_losses: losses per instance in the batch
-        :type batch_losses: dict
-
-        :return: dict containing various loss values over the batch
-        """
-        losses = dict()
-        for key in instance_losses:
-            losses[key] = torch.mean(instance_losses[key])
-
-        return losses
 
     def _gather_data(self, epoch_data: dict) -> Tuple:
         """Gather preds, targets & other epoch data in one tensor
@@ -136,48 +51,6 @@ class BinaryClassificationModel(Model):
         epoch_data['targets'] = torch.cat(epoch_data['targets'])
         epoch_data['items'] = np.hstack(epoch_data['items'])
         return epoch_data
-
-    def update_network_params(self, losses):
-        """Defines how to update network weights
-
-        :param losses: losses for the current batch
-        :type losses: dict
-        """
-        self.optimizer.zero_grad()
-        losses['loss'].backward()
-        self.optimizer.step()
-
-    def update_optimizer_params(self, values: dict, update_freq: str):
-        """Update optimization parameters like learning rate etc.
-
-        :param values: dictionary of losses and metrics when invoked
-            after one epoch or dictionary of losses after one batch
-        :type values: dict
-        :param update_freq: whether the function is being called after a
-            batch or an epoch
-        :type update_freq: str
-        """
-        if hasattr(self, 'scheduler'):
-            if hasattr(self, 'value_to_track'):
-                self.scheduler.step(values[self.value_to_track])
-            else:
-                self.scheduler.step()
-
-    def log_batch_summary(self, iterator: Any, mode: str, losses: dict):
-        """Logs the summary of the batch on the progressbar in command line
-
-        :param iterator: tqdm iterator
-        :type iterator: tqdm
-        :param mode: train/val or test mode
-        :type mode: str
-        :param losses: losses for the current batch
-        :type losses: dict
-        """
-        iterator.set_description(
-             "V: {} | Epoch: {} | {} | Loss {:.4f}".format(
-                self.config.version, self.epoch_counter, mode.capitalize(),
-                losses['loss']
-                ), refresh=True)
 
     def log_epoch_summary(self, mode: str, epoch_losses: dict, metrics: dict,
                           epoch_data: dict, learning_rates: List[Any],
@@ -416,43 +289,6 @@ class BinaryClassificationModel(Model):
             else:
                 sys.exit(color('Checkpoint file does not exist at {}'.format(
                     self.load_path), 'red'))
-
-    def _accumulate_lr(self, learning_rates: List[Any]) -> dict:
-        """Accumulate learning rate values
-
-        :param learning_rates: Dynamically accumulated learning rates per batch
-            over all epochs
-        :type learning_rates: List[Any]
-        :return: dict containing a running list of learning rates
-        """
-        learning_rates.append(self.optimizer.param_groups[0]['lr'])
-        return learning_rates
-
-    def process_batch(self, batch: Any) -> Tuple[Any, Any]:
-        """Returns the predictions and targets for each batch
-
-        :param batch: one batch of data containing inputs and targets
-        :type batch: Any
-
-        :return: dict containing predictions and targets
-        """
-        inputs = batch['signals'].to(self.device)
-        labels = batch['labels'].to(self.device)
-
-        if self.network.training:
-            predictions = self.network(inputs)
-        else:
-            with torch.no_grad():
-                predictions = self.network(inputs)
-
-        batch_data = {
-            'inputs': inputs,
-            'predictions': predictions.squeeze(),
-            'targets': labels,
-            'items': batch['items']
-        }
-
-        return batch_data
 
     def _update_wandb(self, mode: str, epoch_losses: dict, metrics: dict,
                       epoch_data: dict, learning_rates: List[Any] = None,
