@@ -103,24 +103,18 @@ class Config:
         assert 'module' in params
         assert 'loss' in params['module']['config']
 
-        # if 'optimizer' in params['model'] and 'scheduler' in params['model']['optimizer']:
-        #     scheduler_config = params['model']['optimizer']['scheduler']
+        # check scheduler params
+        if 'optimizer' in params['module']['config']:
+            optimizer_config = params['module']['config']['optimizer']
+            if 'scheduler' in optimizer_config:
+                scheduler_config = optimizer_config['scheduler']
+                assert 'interval' in scheduler_config
 
-        #     if scheduler_config['name'] == 'StepLR':
-        #         assert scheduler_config['update'] == 'epoch'
-        #         assert 'value' not in scheduler_config
-        #     if scheduler_config['name'] == 'MultiStepLR':
-        #         assert scheduler_config['update'] == 'epoch'
-        #         assert 'value' not in scheduler_config
-        #     elif scheduler_config['name'] == 'ReduceLRInPlateau':
-        #         assert scheduler_config['update'] == 'epoch'
-        #         assert 'value' in scheduler_config
-        #     elif scheduler_config['name'] == 'CyclicLR':
-        #         assert scheduler_config['update'] == 'batch'
-        #         assert 'value' not in scheduler_config
-        #     elif scheduler_config['name'] == '1cycle':
-        #         assert scheduler_config['update'] == 'batch'
-        #         assert 'value' not in scheduler_config
+                if scheduler_config['name'] == 'ReduceLRInPlateau':
+                    assert 'monitor' in scheduler_config
+                elif scheduler_config['name'] in ['CyclicLR', '1cycle']:
+                    assert scheduler_config['interval'] == 'batch'
+                    assert 'monitor' not in scheduler_config
 
     def update_from_params(self, params: Dict):
         """Updates parameters from dict"""
