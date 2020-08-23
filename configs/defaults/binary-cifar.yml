@@ -1,6 +1,7 @@
 description: default config for binary CIFAR10 classification
 logger:
   entity: dalmiaman
+  project: test-lightning
 
 trainer:
   batch_size: 8
@@ -8,6 +9,7 @@ trainer:
   params:
     gpus:
       - 0
+    row_log_interval: 1
 
 module:
   name: binary-classification
@@ -42,7 +44,7 @@ module:
       - 0
       - 1
     save:
-      period: 2
+      period: 1
       monitor: val_loss
       verbose: true
       mode: min

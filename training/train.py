@@ -29,13 +29,15 @@ def main(args):
     config.trainer['num_workers'] = args.num_workers
     trainer_args = vars(args)
 
+    # disable logger by default
+    trainer_args['logger'] = None
+
     # setup wandb
     if args.wandb:
         config.logger.update({
             'name': args.version.replace('/', '_'),
             'save_dir': dirname(config.checkpoint_dir),
-            'id': args.id,
-            'offline': args.wandb
+            'id': args.id
         })
         logger = pl.loggers.WandbLogger(**config.logger)
         trainer_args['logger'] = logger

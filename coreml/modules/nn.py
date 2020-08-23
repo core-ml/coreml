@@ -1,13 +1,13 @@
 """Defines the class for feed-forward LightningModule."""
 from typing import Dict, Tuple, Any, Union
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import logging
 from abc import abstractmethod
 
 import torch
 import torch.nn as nn
 import wandb
-import pytorch_lightning as pl 
+import pytorch_lightning as pl
 
 from coreml.modules.backbones.utils import _correct_state_dict
 from coreml.modules.layers import layer_factory
@@ -124,7 +124,7 @@ class NeuralNetworkModule(pl.LightningModule):
             'interval': scheduler_config['interval'],
             'frequency': scheduler_config.get('frequency', 1),
         }
-        
+
         return {
             'optimizer': optimizer,
             'lr_scheduler': scheduler
@@ -132,7 +132,8 @@ class NeuralNetworkModule(pl.LightningModule):
 
     def watch(self):
         """Defines how to track gradients and weights in wandb"""
-        self.logger.experiment.watch(self.blocks, log='all')
+        if self.logger is not None:
+            self.logger.watch(self.blocks, log='all')
 
     def process_batch(self, batch: Any) -> Dict:
         """Returns the predictions, targets and loss for each batch
@@ -188,14 +189,16 @@ class NeuralNetworkModule(pl.LightningModule):
         return losses
 
     def _step(
-            self, batch: Any, mode: str
+            self, batch: Any, mode: str, log: bool = False
             ) -> Union[pl.TrainResult, pl.EvalResult]:
         """Perform one step of train/val/test
-        
+
         :param batch: one batch of data containing inputs and targets
         :type batch: Any
         :param mode: either of train/val/test mode
-        :type mode: str       
+        :type mode: str
+        :param log: whether to log values, defaults to False
+        :type log: bool, optional
         """
         batch_data = self.process_batch(batch)
 
@@ -209,27 +212,15 @@ class NeuralNetworkModule(pl.LightningModule):
         batch_losses = self.calculate_batch_loss(instance_losses)
         loss = batch_losses['loss']
 
-        # define the result object
-        if mode == self.train_mode:
-            result = pl.TrainResult(loss)
-        else:
-            result = pl.EvalResult()
+        if log and self.logger is not None:
+            self.logger.experiment.log({
+                f'{mode}/step_loss': loss,
+            }, step=self.logger.experiment.step)
 
-        # add values to the result object
-        for key, value in batch_data.items():
-            if isinstance(value, torch.Tensor):
-                value = value.detach()
-            setattr(result, key, value)
-
-        # log the loss
-        result.log(
-            f'{mode}_loss', loss, on_step=True, on_epoch=True, logger=True,
-            prog_bar=True, sync_dist=True)
-
-        return result
+        return OrderedDict({'loss': loss})
 
     def training_step(self, batch, batch_idx):
-        return self._step(batch, self.train_mode)
+        return self._step(batch, self.train_mode, log=True)
 
     def validation_step(self, batch, batch_idx):
         return self._step(batch, self.val_mode)
@@ -237,8 +228,34 @@ class NeuralNetworkModule(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         return self._step(batch, self.test_mode)
 
+    def _epoch_end(self, outputs, mode):
+        epoch_outputs = defaultdict(list)
+        for output in outputs:
+            for key, value in output.items():
+                epoch_outputs[key].append(value)
+
+        logs = {}
+        for key, value in epoch_outputs.items():
+            logs[f'{mode}/{key}'] = torch.stack(value).mean()
+            epoch_outputs[key] = torch.stack(value).mean()
+
+        if self.logger is not None:
+            # ideally this should be self.global_step but lightning
+            # calls self.logger without step (within trainer/evaluation_loop.py
+            # - __log_evaluation_epoch_metrics()) implicitly and that increments
+            # the experiment step by 1.
+            self.logger.experiment.log(logs, step=self.logger.experiment.step)
+        return OrderedDict(epoch_outputs)
+
+    def training_epoch_end(self, outputs):
+        return self._epoch_end(outputs, self.train_mode)
+
+    def validation_epoch_end(self, outputs):
+        return self._epoch_end(outputs, self.val_mode)
+
+    def test_epoch_end(self, outputs):
+        return self._epoch_end(outputs, self.test_mode)
+
     def on_fit_start(self):
         # log gradients and model parameters
         self.watch()
-
-
