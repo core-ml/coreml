@@ -108,13 +108,14 @@ class Config:
             optimizer_config = params['module']['config']['optimizer']
             if 'scheduler' in optimizer_config:
                 scheduler_config = optimizer_config['scheduler']
-                assert 'interval' in scheduler_config
+                scheduler_opt_params = scheduler_config['opt_params']
+                assert 'interval' in scheduler_opt_params
 
                 if scheduler_config['name'] == 'ReduceLRInPlateau':
-                    assert 'monitor' in scheduler_config
+                    assert 'monitor' in scheduler_opt_params
                 elif scheduler_config['name'] in ['CyclicLR', '1cycle']:
-                    assert scheduler_config['interval'] == 'batch'
-                    assert 'monitor' not in scheduler_config
+                    assert scheduler_opt_params['interval'] == 'batch'
+                    assert 'monitor' not in scheduler_config['opt_params']
 
     def update_from_params(self, params: Dict):
         """Updates parameters from dict"""

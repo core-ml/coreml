@@ -114,15 +114,13 @@ class NeuralNetworkModule(pl.LightningModule):
             return optimizer
 
         scheduler_config = self.config['optimizer']['scheduler']
-        scheduler_config['params']['optimizer'] = optimizer
+        scheduler_config['init_params']['optimizer'] = optimizer
 
         scheduler = {
             'scheduler': scheduler_factory.create(
                 scheduler_config['name'],
-                **scheduler_config['params']),
-            'monitor': scheduler_config['monitor'],
-            'interval': scheduler_config['interval'],
-            'frequency': scheduler_config.get('frequency', 1),
+                **scheduler_config['init_params']),
+            **scheduler_config['opt_params']
         }
 
         return {
@@ -259,9 +257,3 @@ class NeuralNetworkModule(pl.LightningModule):
     def on_fit_start(self):
         # log gradients and model parameters
         self.watch()
-
-    # def on_fit_end(self):
-    #     import ipdb; ipdb.set_trace()
-
-    # def on_save_checkpoint(self, checkpoint):
-    #     import ipdb; ipdb.set_trace()

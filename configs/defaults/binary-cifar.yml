@@ -21,16 +21,12 @@ module:
         momentum: 0.9
         nesterov: true
       scheduler:
-        interval: epoch
-        monitor: loss
-        name: ReduceLROnPlateau
-        params:
-            mode: 'min'
-            factor: 0.1
-            patience: 5
-            verbose: true
-            threshold: 0.0001
-            threshold_mode: abs
+        name: StepLR
+        init_params:
+            gamma: 0.9
+            step_size: 1
+        opt_params:
+          interval: epoch
     loss:
       train:
         name: binary-cross-entropy
@@ -48,7 +44,7 @@ module:
       monitor: loss
       verbose: true
       mode: min
-      save_weights_only: true
+      save_weights_only: false
       save_top_k: -1
     load:
       version: null
