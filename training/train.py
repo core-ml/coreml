@@ -12,14 +12,6 @@ from coreml.trainer import Trainer
 
 warnings.simplefilter('ignore')
 
-# TODO: notes in wandb
-# TODO: allow_val_change in wandb
-# TODO: on fit end log best_model_path and best_model_score to summary wandb
-
-
-# def train(config, debug, overfit_batch, use_wandb):
-# model.fit(debug=debug, overfit_batch=overfit_batch, use_wandb=use_wandb)
-
 
 def main(args):
     pl.seed_everything(args.seed)
@@ -51,6 +43,8 @@ def main(args):
 
     # define trainer object
     trainer = Trainer(config, **trainer_args)
+
+    # log which checkpoint path is going to be used
 
     # train the model
     trainer.fit()

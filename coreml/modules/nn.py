@@ -14,7 +14,7 @@ from coreml.modules.layers import layer_factory
 from coreml.modules.init import init_factory
 from coreml.utils.typing import LayerConfigDict
 from coreml.utils.logger import color
-from coreml.optimization import optimizer_factory, scheduler_factory
+from coreml.modules.optimization import optimizer_factory, scheduler_factory
 
 
 # TODO:
@@ -243,6 +243,8 @@ class NeuralNetworkModule(pl.LightningModule):
             # - __log_evaluation_epoch_metrics()) implicitly and that
             # increments the experiment step by 1.
             self.logger.experiment.log(logs, step=self.logger.experiment.step)
+
+        print(logs)
         return OrderedDict(epoch_outputs)
 
     def training_epoch_end(self, outputs):

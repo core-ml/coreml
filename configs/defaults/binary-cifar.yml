@@ -36,11 +36,15 @@ module:
         name: binary-cross-entropy
         params:
             reduction: none
+      test:
+        name: binary-cross-entropy
+        params:
+            reduction: none
     classes:
       - 0
       - 1
     checkpoint:
-      period: 1
+      period: 2
       monitor: loss
       verbose: true
       mode: min
