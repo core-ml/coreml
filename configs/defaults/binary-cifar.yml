@@ -14,6 +14,7 @@ trainer:
 module:
   name: binary-classification
   config:
+    # optimization
     optimizer:
       name: SGD
       args:
@@ -27,6 +28,8 @@ module:
             step_size: 1
         opt_params:
           interval: epoch
+
+    # loss function
     loss:
       train:
         name: binary-cross-entropy
@@ -40,9 +43,13 @@ module:
         name: binary-cross-entropy
         params:
             reduction: none
+
+    # meta
     classes:
       - 0
       - 1
+
+    # model checkpoint
     checkpoint:
       period: 1
       monitor: loss
@@ -50,12 +57,20 @@ module:
       mode: min
       save_weights_only: false
       save_top_k: -1
+
+    # resuming model checkpoint
+    # TODO
     load:
       version: null
       epoch: -1
       load_best: False
       resume_optimizer: False
 
+    # evaluation
+    eval:
+      maximize_metric: specificity
+
+    # neural net architecture
     network:
       config:
         - name: Conv2d

@@ -1,9 +1,10 @@
 """Defines the class for feed-forward LightningModule."""
-from typing import Dict, Tuple, Any, Union
+from typing import Dict, Tuple, Any, Union, Set
 from collections import OrderedDict, defaultdict
 import logging
 from abc import abstractmethod
 
+import numpy as np
 import torch
 import torch.nn as nn
 import wandb
@@ -215,7 +216,12 @@ class NeuralNetworkModule(pl.LightningModule):
                 f'{mode}/step_loss': loss,
             }, step=self.logger.experiment.step)
 
-        return OrderedDict({'loss': loss})
+        # add loss to batch data
+        batch_data.update({
+            'loss': loss,
+            'instance_loss': instance_losses
+        })
+        return OrderedDict(batch_data)
 
     def training_step(self, batch, batch_idx):
         return self._step(batch, self.train_mode, log=True)
@@ -226,25 +232,132 @@ class NeuralNetworkModule(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         return self._step(batch, self.test_mode)
 
+    @property
+    def loss_keys(self) -> Set[str]:
+        """Returns the keys for the loss values returned in _step()"""
+        return {'loss'}
+
+    def gather_losses(self, epoch_outputs: dict):
+        """Gather losses over the epoch
+
+        :param epoch_outputs: dictionary containing outputs for the epoch
+        :type epoch_outputs: dict
+        """
+        for key, value in epoch_outputs.items():
+            # retain only loss keys
+            if key in self.loss_keys:
+                if not value[0].ndim:
+                    # stack list of losses (batch losses)
+                    epoch_outputs[key] = torch.stack(value).mean()
+                else:
+                    # concatenate list of lists of losses (instance losses)
+                    epoch_outputs[key] = torch.cat(value).mean()
+
+    def gather_data(self, epoch_outputs: dict):
+        """Gather predictions, targets & items over the epoch
+
+        :param epoch_outputs: dictionary containing outputs for the epoch
+        :type epoch_outputs: dict
+        """
+        epoch_outputs['predictions'] = torch.cat(
+            epoch_outputs['predictions'])
+        epoch_outputs['targets'] = torch.cat(epoch_outputs['targets'])
+        epoch_outputs['items'] = np.hstack(epoch_outputs['items'])
+
+    @abstractmethod
+    def get_eval_params(self, predictions: Any, targets: Any) -> dict:
+        """Get evaluation params by optimizing on the given data
+
+        :param predictions: epoch predictions
+        :type predictions: Any
+        :param targets: ground truths for the epoch
+        :type targets: Any
+
+        :return: dict containing evaluation parameters
+        """
+        pass
+
+    @abstractmethod
+    def compute_epoch_metrics(
+            self, predictions: Any, targets: Any, **kwargs) -> dict:
+        """Computes metrics for the epoch
+
+        :param predictions: epoch predictions
+        :type predictions: Any
+        :param targets: ground truths for the epoch
+        :type targets: Any
+
+        :return: dictionary of metrics as provided in the config file
+        """
+        pass
+
+    def update_wandb(self, mode: str, epoch_outputs: dict, metrics: dict):
+        """Logs values to wandb
+
+        :param mode: train/val/test mode
+        :type mode: str
+        :param epoch_outputs: dictionary containing outputs for the epoch
+        :type epoch_outputs: dict
+        :param metrics: metrics for the epoch
+        :type metrics: dict
+        """
+        if self.logger is not None:
+            print(color('Logging to W&B'))
+            wandb_logs = {}
+
+            # log losses
+            for key, value in epoch_outputs.items():
+                if key in self.loss_keys:
+                    wandb_logs[f'{mode}/{key}'] = value
+                    print(color(f'{mode}/{key}: {value}', 'magenta'))
+
+            for metric, value in metrics.items():
+                # only log metrics with scalar values here
+                if isinstance(value, (int, float)):
+                    wandb_logs[f'{mode}/{metric}'] = value
+                    print(color(f'{mode}/{metric}: {value}', 'magenta'))
+
+            # ideally this should be self.global_step but lightning
+            # calls self.logger without step (within trainer/evaluation_loop.py
+            # - __log_evaluation_epoch_metrics()) implicitly and that
+            # increments the experiment step by 1.
+            self.logger.experiment.log(
+                wandb_logs, step=self.logger.experiment.step)
+
+    def save_logs(self):
+        pass
+
     def _epoch_end(self, outputs, mode):
         epoch_outputs = defaultdict(list)
         for output in outputs:
             for key, value in output.items():
                 epoch_outputs[key].append(value)
 
-        logs = {}
-        for key, value in epoch_outputs.items():
-            logs[f'{mode}/{key}'] = torch.stack(value).mean()
-            epoch_outputs[key] = torch.stack(value).mean()
+        # accumulate losses over the epoch
+        self.gather_losses(epoch_outputs)
 
-        if self.logger is not None:
-            # ideally this should be self.global_step but lightning
-            # calls self.logger without step (within trainer/evaluation_loop.py
-            # - __log_evaluation_epoch_metrics()) implicitly and that
-            # increments the experiment step by 1.
-            self.logger.experiment.log(logs, step=self.logger.experiment.step)
+        # accumulate predictions, targets and items over the epoch
+        self.gather_data(epoch_outputs)
 
-        print(color(logs))
+        # get parameters for evaluation like the optimal
+        # threshold for classification
+        eval_params = self.get_eval_params(
+            epoch_outputs['predictions'], epoch_outputs['targets'])
+
+        # calculate metrics for the epoch
+        print(color('Computing metrics'))
+        metrics = self.compute_epoch_metrics(
+            epoch_outputs['predictions'], epoch_outputs['targets'],
+            **eval_params)
+
+        # update logger
+        self.update_wandb(
+            mode, epoch_outputs, metrics)
+
+        # save logs
+        self.save_logs()
+
+        # print(color(logs))
         return OrderedDict(epoch_outputs)
 
     def training_epoch_end(self, outputs):

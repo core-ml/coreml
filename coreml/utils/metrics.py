@@ -194,6 +194,6 @@ class SpecificityAtSensitivity(Metric):
                 'SpecificityAtSensitivity only supports binary classification tasks')
 
 
-factory = Factory()
-factory.register_builder('precision', PrecisionAtRecall)
-factory.register_builder('specificity', SpecificityAtSensitivity)
+metric_factory = Factory()
+metric_factory.register_builder('precision', PrecisionAtRecall)
+metric_factory.register_builder('specificity', SpecificityAtSensitivity)

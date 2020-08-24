@@ -10,7 +10,7 @@ from matplotlib.colors import ListedColormap
 import matplotlib.cm as cm
 
 from coreml.utils.viz import fig2im
-from coreml.decomposition import factory as decomposition_factory
+from coreml.modules.decomposition import factory as decomposition_factory
 
 # set precision
 torch.set_printoptions(precision=4)
@@ -37,7 +37,8 @@ def get_confusion_matrix(
     tickpositions = {}
     for k in ('x', 'y'):
         key = k + 'ticks'
-        tickpositions[key] = [0] + (np.array(list(range(0, len(classes)))) \
+        tickpositions[key] = [0] + (
+            np.array(list(range(0, len(classes))))
             + 0.5).tolist() + [len(classes)]
 
     fmt = 'd'
