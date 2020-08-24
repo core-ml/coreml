@@ -14,14 +14,12 @@ from coreml.utils.wandb import get_confusion_matrix
 from coreml.utils.logger import color
 
 # TODO:
-# wandb-logger
 # model checkpoint
-# LR logger
-# writing everything in train.py
 # tests
 # handle binary with 1/2 outputs
 # multi should only be more than 2
 # sanity check binary with 1 = BCELoss
+# test with TPU
 
 
 class BinaryClassificationModule(NeuralNetworkModule):

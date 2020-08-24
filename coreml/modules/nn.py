@@ -19,7 +19,6 @@ from coreml.modules.optimization import optimizer_factory, scheduler_factory
 
 
 # TODO:
-# wandb-logger
 # model checkpoint - load models
 # tests
 # check loading of checkpoints with matching keys but different shape
@@ -191,7 +190,6 @@ class NeuralNetworkModule(pl.LightningModule):
             self, batch: Any, mode: str, log: bool = False
             ) -> Union[pl.TrainResult, pl.EvalResult]:
         """Perform one step of train/val/test
-
         :param batch: one batch of data containing inputs and targets
         :type batch: Any
         :param mode: either of train/val/test mode
@@ -219,7 +217,6 @@ class NeuralNetworkModule(pl.LightningModule):
         # add loss to batch data
         batch_data.update({
             'loss': loss,
-            'instance_loss': instance_losses
         })
         return OrderedDict(batch_data)
 
@@ -246,12 +243,8 @@ class NeuralNetworkModule(pl.LightningModule):
         for key, value in epoch_outputs.items():
             # retain only loss keys
             if key in self.loss_keys:
-                if not value[0].ndim:
-                    # stack list of losses (batch losses)
-                    epoch_outputs[key] = torch.stack(value).mean()
-                else:
-                    # concatenate list of lists of losses (instance losses)
-                    epoch_outputs[key] = torch.cat(value).mean()
+                # stack list of losses (batch losses)
+                epoch_outputs[key] = torch.stack(value).mean()
 
     def gather_data(self, epoch_outputs: dict):
         """Gather predictions, targets & items over the epoch
@@ -307,6 +300,7 @@ class NeuralNetworkModule(pl.LightningModule):
 
             # log losses
             for key, value in epoch_outputs.items():
+                # retain only loss keys
                 if key in self.loss_keys:
                     wandb_logs[f'{mode}/{key}'] = value
                     print(color(f'{mode}/{key}: {value}', 'magenta'))
@@ -323,9 +317,6 @@ class NeuralNetworkModule(pl.LightningModule):
             # increments the experiment step by 1.
             self.logger.experiment.log(
                 wandb_logs, step=self.logger.experiment.step)
-
-    def save_logs(self):
-        pass
 
     def _epoch_end(self, outputs, mode):
         epoch_outputs = defaultdict(list)
@@ -354,10 +345,6 @@ class NeuralNetworkModule(pl.LightningModule):
         self.update_wandb(
             mode, epoch_outputs, metrics)
 
-        # save logs
-        self.save_logs()
-
-        # print(color(logs))
         return OrderedDict(epoch_outputs)
 
     def training_epoch_end(self, outputs):

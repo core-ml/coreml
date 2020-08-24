@@ -33,6 +33,7 @@ class Trainer(pl.Trainer):
             config.trainer['num_workers'], **config.modes)
 
         # define lightning module
+        config.module['config']['log_dir'] = config.log_dir
         module_params = {
             'config': config.module['config']
         }
