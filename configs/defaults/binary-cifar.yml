@@ -8,7 +8,7 @@ trainer:
   params:
     gpus:
       - 0
-    max_epochs: 10
+    max_epochs: 100
     weights_summary: full
 
 module:
@@ -44,7 +44,7 @@ module:
       - 0
       - 1
     checkpoint:
-      period: 2
+      period: 1
       monitor: loss
       verbose: true
       mode: min

@@ -244,7 +244,7 @@ class NeuralNetworkModule(pl.LightningModule):
             # increments the experiment step by 1.
             self.logger.experiment.log(logs, step=self.logger.experiment.step)
 
-        print(logs)
+        print(color(logs))
         return OrderedDict(epoch_outputs)
 
     def training_epoch_end(self, outputs):
