@@ -19,10 +19,6 @@ from coreml.utils.array import is_scalar
 from coreml.modules.optimization import optimizer_factory, scheduler_factory
 
 
-# TODO:
-# model checkpoint - load models from config
-
-
 class NeuralNetworkModule(pl.LightningModule):
     """Extends the LightningModule for any feed-forward model
 
