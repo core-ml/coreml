@@ -14,11 +14,7 @@ from coreml.utils.wandb import get_confusion_matrix
 from coreml.utils.logger import color
 
 # TODO:
-# model checkpoint
 # tests
-# handle binary with 1/2 outputs
-# multi should only be more than 2
-# sanity check binary with 1 = BCELoss
 # test with TPU
 
 

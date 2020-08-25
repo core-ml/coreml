@@ -74,6 +74,9 @@ def main(args):
     # define trainer object
     trainer = Trainer(config, **trainer_args)
 
+    # log which checkpoint is going to be used
+    print(color(f'Using checkpoint as: {ckpt_path}'))
+
     # run evaluation
     trainer.evaluate(eval_mode, ckpt_path=ckpt_path)
 

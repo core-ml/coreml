@@ -44,8 +44,6 @@ def main(args):
     # define trainer object
     trainer = Trainer(config, **trainer_args)
 
-    # log which checkpoint path is going to be used
-
     # train the model
     trainer.fit()
 

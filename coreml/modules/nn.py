@@ -15,12 +15,16 @@ from coreml.modules.layers import layer_factory
 from coreml.modules.init import init_factory
 from coreml.utils.typing import LayerConfigDict
 from coreml.utils.logger import color
+from coreml.utils.array import is_scalar
 from coreml.modules.optimization import optimizer_factory, scheduler_factory
 
 
 # TODO:
 # model checkpoint - load models
 # tests
+# test binary
+# test multi
+# test normal nn things
 # check loading of checkpoints with matching keys but different shape
 
 
@@ -297,19 +301,23 @@ class NeuralNetworkModule(pl.LightningModule):
         if self.logger is not None:
             print(color('Logging to W&B'))
             wandb_logs = {}
+            print_log = f'{mode}/'
 
             # log losses
             for key, value in epoch_outputs.items():
                 # retain only loss keys
                 if key in self.loss_keys:
                     wandb_logs[f'{mode}/{key}'] = value
-                    print(color(f'{mode}/{key}: {value}', 'magenta'))
+                    print_log += f'{key}: {value}\t'
 
             for metric, value in metrics.items():
                 # only log metrics with scalar values here
-                if isinstance(value, (int, float)):
+                if is_scalar(value):
                     wandb_logs[f'{mode}/{metric}'] = value
-                    print(color(f'{mode}/{metric}: {value}', 'magenta'))
+                    print_log += f'{metric}: {value}\t'
+
+            # print losses and metrics to log
+            print(color(print_log, 'magenta'))
 
             # ideally this should be self.global_step but lightning
             # calls self.logger without step (within trainer/evaluation_loop.py
