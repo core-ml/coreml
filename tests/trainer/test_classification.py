@@ -1,4 +1,4 @@
-"""Tests coreml.models.binary_classification"""
+"""Tests classification (binary + multiclass) training"""
 from copy import deepcopy
 from shutil import rmtree
 from os.path import join
@@ -29,6 +29,25 @@ class BinaryClassificationTestCase(unittest.TestCase):
         trainer = Trainer(self.cfg, **self.cfg.trainer['params'])
         trainer.evaluate(
             'test', ckpt_path=join(self.cfg.checkpoint_dir, 'epoch=0.ckpt'))
+
+
+class MultiClassClassificationTestCase(BinaryClassificationTestCase):
+    """Test training for multiclass classification task"""
+    @classmethod
+    def setUpClass(cls):
+        version = 'configs/defaults/cifar10-resnet18.yml'
+        cls.cfg = Config(version)
+        cls.cfg.trainer['num_workers'] = 10
+        cls.cfg.trainer['params']['max_epochs'] = 1
+        cls.cfg.trainer['params']['logger'] = None
+        cls.cfg.data['dataset']['params'] = {
+            'train-val': {
+                'fraction': 0.05
+            },
+            'test': {
+                'fraction': 0.05
+            }
+        }
 
 
 if __name__ == "__main__":
