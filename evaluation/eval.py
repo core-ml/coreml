@@ -68,6 +68,8 @@ def main(args):
         trainer_args.pop(key, None)
 
     # restore trainer to the state at the end of training
+    # ISSUE: ideally, it should resume optimizer state and callback states
+    # as well - that does not happen - lightning issue
     last_ckpt_path = get_last_saved_checkpoint_path(config.checkpoint_dir)
     trainer_args['resume_from_checkpoint'] = last_ckpt_path
 

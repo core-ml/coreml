@@ -20,12 +20,7 @@ from coreml.modules.optimization import optimizer_factory, scheduler_factory
 
 
 # TODO:
-# model checkpoint - load models
-# tests
-# test binary
-# test multi
-# test normal nn things
-# check loading of checkpoints with matching keys but different shape
+# model checkpoint - load models from config
 
 
 class NeuralNetworkModule(pl.LightningModule):
@@ -361,7 +356,14 @@ class NeuralNetworkModule(pl.LightningModule):
         return self._epoch_end(outputs, self.val_mode)
 
     def test_epoch_end(self, outputs):
-        return self._epoch_end(outputs, self.test_mode)
+        results = self._epoch_end(outputs, self.test_mode)
+
+        # remove non-scalar values
+        keys_to_drop = ['predictions', 'items', 'targets']
+        for key in keys_to_drop:
+            results.pop(key, None)
+
+        return results
 
     def on_fit_start(self):
         # log gradients and model parameters
