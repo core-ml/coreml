@@ -157,7 +157,6 @@ class NeuralNetworkModule(pl.LightningModule):
             'items': batch['items']
         }
 
-    @abstractmethod
     def calculate_instance_loss(
             self, predictions, targets, mode: str,
             as_numpy: bool = False) -> dict:
@@ -174,7 +173,7 @@ class NeuralNetworkModule(pl.LightningModule):
 
         :return: dict of losses with list of loss values per instance
         """
-        pass
+        return NotImplementedError
 
     def calculate_batch_loss(self, instance_losses) -> dict:
         """Calculate mean of each loss for the batch
@@ -261,7 +260,6 @@ class NeuralNetworkModule(pl.LightningModule):
         epoch_outputs['targets'] = torch.cat(epoch_outputs['targets'])
         epoch_outputs['items'] = np.hstack(epoch_outputs['items'])
 
-    @abstractmethod
     def get_eval_params(self, predictions: Any, targets: Any) -> dict:
         """Get evaluation params by optimizing on the given data
 
@@ -272,9 +270,8 @@ class NeuralNetworkModule(pl.LightningModule):
 
         :return: dict containing evaluation parameters
         """
-        pass
+        return NotImplementedError
 
-    @abstractmethod
     def compute_epoch_metrics(
             self, predictions: Any, targets: Any, **kwargs) -> dict:
         """Computes metrics for the epoch
@@ -286,7 +283,7 @@ class NeuralNetworkModule(pl.LightningModule):
 
         :return: dictionary of metrics as provided in the config file
         """
-        pass
+        return NotImplementedError
 
     def update_wandb(self, mode: str, epoch_outputs: dict, metrics: dict):
         """Logs values to wandb

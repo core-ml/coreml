@@ -1,35 +1,39 @@
 """Tests coreml.optimizer"""
 import torch
 import unittest
-from coreml.networks.nn import NeuralNetwork
-from coreml.optimizer import optimizer_factory
+from coreml.modules.nn import NeuralNetworkModule
+from coreml.modules.optimization import optimizer_factory
 
 
 class OptimizerTestCase(unittest.TestCase):
     """Class to check the creation of Optimizer"""
     @classmethod
     def setUpClass(cls):
-        cfg = [
-            {
-                'name': 'Conv2d',
-                'params': {
-                    "in_channels": 1,
-                    "out_channels": 16,
-                    "kernel_size": [3, 7]
-                }
-            },
-            {
-                'name': 'BatchNorm2d',
-                'params': {
-                    "num_features": 16
-                }
-            },
-            {
-                'name': 'LeakyReLU',
-                'params': {}
+        cfg = {
+            'network': {
+                'config': [
+                    {
+                        'name': 'Conv2d',
+                        'params': {
+                            "in_channels": 1,
+                            "out_channels": 16,
+                            "kernel_size": [3, 7]
+                        }
+                    },
+                    {
+                        'name': 'BatchNorm2d',
+                        'params': {
+                            "num_features": 16
+                        }
+                    },
+                    {
+                        'name': 'LeakyReLU',
+                        'params': {}
+                    }
+                ]
             }
-        ]
-        cls.network = NeuralNetwork(cfg)
+        }
+        cls.network = NeuralNetworkModule(cfg)
 
     def test_adam(self):
         """Test creation of a Adam optimizer"""
