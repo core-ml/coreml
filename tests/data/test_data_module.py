@@ -1,14 +1,15 @@
-"""Tests coreml.data.dataloader.py"""
+"""Tests coreml.data.data_module.py"""
 from os.path import join, exists
+import multiprocessing as mp
 import torch
 import numpy as np
 import unittest
 from coreml.config import DATA_ROOT
-from coreml.data.dataloader import get_dataloader
+from coreml.data.data_module import DataModule
 
 
-class DataloaderTestCase(unittest.TestCase):
-    """Class to check the creation of DataLoader"""
+class DataModuleTestCase(unittest.TestCase):
+    """Class to check the creation of DataModule"""
     @classmethod
     def setUpClass(cls):
         if not exists(join(DATA_ROOT, 'CIFAR10')):
@@ -16,7 +17,7 @@ class DataloaderTestCase(unittest.TestCase):
                 'python /workspace/coreml/tasks/data/classification/CIFAR10.py',
                 shell=True)
 
-    def test_classification_dataloader(self):
+    def test_classification_data_module(self):
         """Test get_dataloader for classification"""
         cfg = {
             'root': DATA_ROOT,
@@ -45,6 +46,34 @@ class DataloaderTestCase(unittest.TestCase):
                 }
             },
             'signal_transform': {
+                'train': [
+                    {
+                        'name': 'Permute',
+                        'params': {
+                            'order': [2, 0, 1]
+                        }
+                    },
+                    {
+                        'name': 'Resize',
+                        'params': {
+                            'size': [30, 30]
+                        }
+                    }
+                ],
+                'val': [
+                    {
+                        'name': 'Permute',
+                        'params': {
+                            'order': [2, 0, 1]
+                        }
+                    },
+                    {
+                        'name': 'Resize',
+                        'params': {
+                            'size': [30, 30]
+                        }
+                    }
+                ],
                 'test': [
                     {
                         'name': 'Permute',
@@ -61,6 +90,12 @@ class DataloaderTestCase(unittest.TestCase):
                 ]
             },
             'sampler': {
+                'train': {
+                    'name': 'default'
+                },
+                'val': {
+                    'name': 'default'
+                },
                 'test': {
                     'name': 'default'
                 }
@@ -70,20 +105,21 @@ class DataloaderTestCase(unittest.TestCase):
             }
         }
         batch_size = 8
+        data_module = DataModule(cfg, batch_size, mp.cpu_count())
 
-        dataloader, _ = get_dataloader(
-            cfg, 'test', batch_size=batch_size, shuffle=False, drop_last=False)
-
-        iterator = iter(dataloader)
-        batch = next(iterator)
+        train_dataloader = data_module.train_dataloader()
+        batch = next(iter(train_dataloader))
         signals, labels = batch['signals'], batch['labels']
+        self.assertTrue(signals.shape, (batch_size, 3, 30, 30))
 
-        self.assertIsInstance(signals, torch.Tensor)
-        self.assertIsInstance(labels, torch.Tensor)
-        self.assertEqual(signals.dtype, torch.float32)
-        self.assertEqual(labels.dtype, torch.float32)
-        self.assertEqual(len(signals), len(labels))
-        self.assertEqual(len(signals.shape), 4)
+        val_dataloader = data_module.val_dataloader()
+        batch = next(iter(val_dataloader))
+        signals, labels = batch['signals'], batch['labels']
+        self.assertTrue(signals.shape, (batch_size, 3, 30, 30))
+
+        test_dataloader = data_module.test_dataloader()
+        batch = next(iter(test_dataloader))
+        signals, labels = batch['signals'], batch['labels']
         self.assertTrue(signals.shape, (batch_size, 3, 30, 30))
 
 
