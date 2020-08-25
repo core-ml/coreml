@@ -194,7 +194,7 @@ class BinaryClassificationModule(NeuralNetworkModule):
                 wandb_logs, step=self.logger.experiment.step)
 
 
-class MultiClassClassificationModule(NeuralNetworkModule):
+class MultiClassClassificationModule(BinaryClassificationModule):
     """LightningModule for binary classification"""
     def compute_epoch_metrics(
             self, predictions: torch.Tensor, targets: torch.Tensor,
@@ -224,7 +224,7 @@ class MultiClassClassificationModule(NeuralNetworkModule):
         predicted_labels = torch.argmax(predictions, dim=1).detach().cpu()
 
         if classes is None:
-            classes = self.model_config['classes']
+            classes = self.config['classes']
 
         confusion_matrix = ConfusionMatrix(classes)
         confusion_matrix(targets, predicted_labels)
