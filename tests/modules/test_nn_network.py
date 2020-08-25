@@ -1,16 +1,17 @@
-"""Tests coreml.models.nn.NeuralNetwork"""
+"""Tests coreml.modules.nn.NeuralNetworkModule network"""
 import torch
 import unittest
-from torch.nn import Conv2d, BatchNorm2d, LeakyReLU
+from copy import deepcopy
+from torch.nn import Conv2d, BatchNorm2d, ReLU
 from numpy.testing import assert_array_equal
-from coreml.networks.nn import NeuralNetwork
+from coreml.modules.nn import NeuralNetworkModule
 
 
-class NeuralNetworkTestCase(unittest.TestCase):
-    """Class to check the creation of NeuralNetwork"""
+class NeuralNetworkModuleNetworkTestCase(unittest.TestCase):
+    """Class to check the creation of NeuralNetworkModule's network"""
     @classmethod
     def setUpClass(cls):
-        cls.network_config = [
+        network_config = [
             {
                 "name": "Conv2d",
                 "params": {
@@ -47,32 +48,17 @@ class NeuralNetworkTestCase(unittest.TestCase):
                 }
             },
         ]
+        cls.config = {
+            'network': {
+                'config': network_config
+            }
+        }
 
     def test_cnn_creation(self):
-        """Test creation of a CNN using NeuralNetwork"""
-        cfg = [
-            {
-                "name": "Conv2d",
-                "params": {
-                    "in_channels": 1,
-                    "out_channels": 16,
-                    "kernel_size": [3, 7]
-                }
-            },
-            {
-                "name": "BatchNorm2d",
-                "params": {
-                    "num_features": 16
-                }
-            },
-            {
-                "name": "LeakyReLU",
-                "params": {}
-            }
-        ]
-
-        network = NeuralNetwork(cfg)
-        self.assertEqual(len(cfg), len(network.blocks))
+        """Test creation of a CNN using NeuralNetworkModule"""
+        network = NeuralNetworkModule(self.config)
+        self.assertEqual(
+            len(self.config['network']['config']), len(network.blocks))
 
         # test Conv2d
         self.assertIsInstance(network.blocks[0], Conv2d)
@@ -84,11 +70,11 @@ class NeuralNetworkTestCase(unittest.TestCase):
         self.assertIsInstance(network.blocks[1], BatchNorm2d)
         self.assertEqual(network.blocks[1].num_features, 16)
 
-        # test LeakyReLU
-        self.assertIsInstance(network.blocks[2], LeakyReLU)
+        # test ReLU
+        self.assertIsInstance(network.blocks[2], ReLU)
 
     def test_init(self):
-        """Test weight initialization of a NeuralNetwork"""
+        """Test weight initialization of a NeuralNetworkModule"""
         network_init = {
             "weight": {
                 "name": "constant",
@@ -116,14 +102,17 @@ class NeuralNetworkTestCase(unittest.TestCase):
             }
         }
 
-        network = NeuralNetwork(self.network_config, network_init)
+        self.init_config = deepcopy(self.config)
+        self.init_config['network']['init'] = network_init
+
+        network = NeuralNetworkModule(self.init_config)
 
         for m in network.modules():
             if isinstance(m, BatchNorm2d) or isinstance(m, Conv2d):
                 assert_array_equal(m.weight.detach().numpy(), 0)
                 assert_array_equal(m.bias.detach().numpy(), 0)
 
-        network = NeuralNetwork(self.network_config)
+        network = NeuralNetworkModule(self.config)
 
         for m in network.modules():
             if isinstance(m, BatchNorm2d):
@@ -132,14 +121,15 @@ class NeuralNetworkTestCase(unittest.TestCase):
 
     def test_freeze_layers(self):
         """Test freezing layers of a network"""
-        network_config = self.network_config.copy()
+        config = deepcopy(self.config)
+        network_config = config['network']['config']
 
         # freeze the first 2 layers
         for index in [0, 1]:
             network_config[index]['requires_grad'] = False
 
-        network = NeuralNetwork(network_config)
-        network.freeze_layers()
+        network = NeuralNetworkModule(config)
+        network.freeze()
         for name, param in network.named_parameters():
             if '0_' in name or '1_' in name:
                 self.assertEqual(param.requires_grad, False)
@@ -151,7 +141,8 @@ class NeuralNetworkTestCase(unittest.TestCase):
 
     def test_freeze_backbone_layers(self):
         """Test freezing layers of backbone in a network"""
-        network_config = self.network_config.copy()
+        config = deepcopy(self.config)
+        network_config = config['network']['config']
 
         # set the backbone as resnet18
         network_config[:2] = [
@@ -183,8 +174,8 @@ class NeuralNetworkTestCase(unittest.TestCase):
         for index in [0, 1]:
             network_config[index]['requires_grad'] = False
 
-        network = NeuralNetwork(network_config)
-        network.freeze_layers()
+        network = NeuralNetworkModule(config)
+        network.freeze()
         for name, param in network.named_parameters():
             if '0_' in name or '1_' in name:
                 self.assertEqual(param.requires_grad, False)
@@ -195,77 +186,9 @@ class NeuralNetworkTestCase(unittest.TestCase):
         self.assertEqual(out.shape, torch.Size([4, 2]))
 
     def test_cnn_forward(self):
-        """Test forward pass of a CNN using NeuralNetwork"""
-        network = NeuralNetwork(self.network_config)
+        """Test forward pass of a CNN using NeuralNetworkModule"""
+        network = NeuralNetworkModule(self.config)
         dummy = torch.zeros(4, 1, 128, 40)
-        out = network(dummy)
-        self.assertEqual(out.shape, torch.Size([4, 2]))
-
-    def test_resnet_backbone_with_layer(self):
-        """Test using resnet backbone in combination with other layers"""
-        cfg = [
-            {
-                "name": "resnet18",
-                "params": {
-                    "in_channels": 1,
-                    "pretrained": True,
-                }
-            },
-            {
-                "name": "AdaptiveAvgPool2d",
-                "params": {
-                    "output_size": (1, 1)
-                }
-            },
-            {
-                "name": "Flatten",
-                "params": {}
-            },
-            {
-                "name": "Linear",
-                "params": {
-                    'in_features': 512,
-                    'out_features': 2
-                }
-            }
-        ]
-
-        network = NeuralNetwork(cfg)
-        dummy = torch.zeros(4, 1, 250, 250)
-        out = network(dummy)
-        self.assertEqual(out.shape, torch.Size([4, 2]))
-
-    def test_vgg_backbone_with_layer(self):
-        """Test using vgg backbone in combination with other layers"""
-        cfg = [
-            {
-                "name": "vgg19",
-                "params": {
-                    "in_channels": 1,
-                    "pretrained": True,
-                }
-            },
-            {
-                "name": "AdaptiveAvgPool2d",
-                "params": {
-                    "output_size": (1, 1)
-                }
-            },
-            {
-                "name": "Flatten",
-                "params": {}
-            },
-            {
-                "name": "Linear",
-                "params": {
-                    'in_features': 512,
-                    'out_features': 2
-                }
-            }
-        ]
-
-        network = NeuralNetwork(cfg)
-        dummy = torch.zeros(4, 1, 250, 250)
         out = network(dummy)
         self.assertEqual(out.shape, torch.Size([4, 2]))
 

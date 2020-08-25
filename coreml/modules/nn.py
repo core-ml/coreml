@@ -45,6 +45,7 @@ class NeuralNetworkModule(pl.LightningModule):
             val_mode: str = 'val', test_mode: str = 'test'):
         super(NeuralNetworkModule, self).__init__()
         self.config = config
+        self.network_config = self.config['network']
         self.train_mode = train_mode
         self.val_mode = val_mode
         self.test_mode = test_mode
@@ -56,7 +57,7 @@ class NeuralNetworkModule(pl.LightningModule):
     def _build_network(self):
         """Defines method to build the network"""
         self.blocks = nn.Sequential()
-        for index, layer_config in enumerate(self.config['network']['config']):
+        for index, layer_config in enumerate(self.network_config['config']):
             layer = layer_factory.create(
                 layer_config['name'], **layer_config['params'])
             self.blocks.add_module(
@@ -65,7 +66,7 @@ class NeuralNetworkModule(pl.LightningModule):
 
     def _init_network(self):
         """Initializes the parameters of the network"""
-        if 'init' not in self.config['network']:
+        if 'init' not in self.network_config:
             return
 
         logging.info(color('Initializing the parameters'))
@@ -80,7 +81,7 @@ class NeuralNetworkModule(pl.LightningModule):
                 self._init_param(m.bias, 'bn_bias')
 
     def _init_param(self, tensor, key):
-        tensor_init_config = self.config['network']['init'].get(key)
+        tensor_init_config = self.network_config['init'].get(key)
         if 'name' in tensor_init_config:
             tensor_init_params = tensor_init_config.get('params', {})
             tensor_init_params['tensor'] = tensor
@@ -91,7 +92,8 @@ class NeuralNetworkModule(pl.LightningModule):
         # freeze layers based on config
         for name, param in self.blocks.named_parameters():
             layer_index = int(name.split('_')[0])
-            if not self.config[layer_index].get('requires_grad', True):
+            if not self.network_config['config'][layer_index].get(
+                    'requires_grad', True):
                 logging.info('Freezing layer: {}'.format(name))
                 param.requires_grad = False
 
