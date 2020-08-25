@@ -22,7 +22,7 @@ class BinaryClassificationModule(NeuralNetworkModule):
     """LightningModule for binary classification"""
     def calculate_instance_loss(
             self, predictions: torch.Tensor, targets: torch.Tensor,
-            mode: str, as_numpy: bool = False) -> dict:
+            mode: str) -> dict:
         """Calculate loss per instance in a batch
 
         :param predictions: Predictions (Predicted)
@@ -31,8 +31,6 @@ class BinaryClassificationModule(NeuralNetworkModule):
         :type targets: torch.Tensor
         :param mode: train/val/test mode
         :type mode: str
-        :param as_numpy: flag to decide whether to return losses as np.ndarray
-        :type as_numpy: bool
 
         :return: dict of losses with list of loss values per instance
         """
@@ -46,10 +44,6 @@ class BinaryClassificationModule(NeuralNetworkModule):
             targets = targets.long()
 
         loss = criterion(predictions, targets)
-
-        if as_numpy:
-            loss = loss.cpu().numpy()
-
         return {'loss': loss}
 
     def compute_epoch_metrics(
@@ -80,8 +74,8 @@ class BinaryClassificationModule(NeuralNetworkModule):
             # convert to sigmoid scores from logits
             predictions = torch.sigmoid(predictions)
 
-        targets = targets.cpu()
-        predict_proba = predictions.detach().cpu()
+        targets = targets.clone()
+        predict_proba = predictions.clone().detach()
 
         if classes is None:
             classes = self.config['classes']
@@ -97,18 +91,29 @@ class BinaryClassificationModule(NeuralNetworkModule):
                 **{'recall': recall})
             _, _, threshold = maximize_fn(targets, predict_proba)
 
-        predicted_labels = torch.ge(predict_proba, threshold).cpu()
+        predicted_labels = torch.ge(predict_proba, threshold)
         confusion_matrix = ConfusionMatrix(classes)
         confusion_matrix(targets, predicted_labels)
+
+        # per class recall
+        recall = Recall(reduction='none')(predicted_labels, targets)
 
         # standard metrics
         metrics = {
             'accuracy': Accuracy()(predicted_labels, targets),
             'confusion_matrix': confusion_matrix.cm,
-            'precision': Precision()(predicted_labels, targets),
-            'recall': Recall()(predicted_labels, targets),
             'threshold': float(threshold),
-            'specificity': confusion_matrix.specificity
+
+            # returns precision per class
+            # take the values for class=1
+            'precision': Precision(reduction='none')(
+                predicted_labels, targets)[1],
+
+            # recall = recall for class 1
+            'recall': recall[1],
+
+            # specificity = recall for class 0
+            'specificity': recall[0],
         }
 
         # PR curve
@@ -220,8 +225,8 @@ class MultiClassClassificationModule(BinaryClassificationModule):
 
         :return: dictionary of metrics
         """
-        targets = targets.cpu()
-        predicted_labels = torch.argmax(predictions, dim=1).detach().cpu()
+        targets = targets.clone()
+        predicted_labels = torch.argmax(predictions, dim=1).clone().detach()
 
         if classes is None:
             classes = self.config['classes']

@@ -68,7 +68,7 @@ module:
 
     # evaluation
     eval:
-      maximize_metric: specificity
+      maximize_metric: precision
 
     # neural net architecture
     network:

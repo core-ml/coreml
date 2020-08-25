@@ -154,9 +154,7 @@ class NeuralNetworkModule(pl.LightningModule):
             'items': batch['items']
         }
 
-    def calculate_instance_loss(
-            self, predictions, targets, mode: str,
-            as_numpy: bool = False) -> dict:
+    def calculate_instance_loss(self, predictions, targets, mode: str) -> dict:
         """Calculate loss per instance in a batch
 
         :param predictions: Predictions (Predicted)
@@ -165,8 +163,6 @@ class NeuralNetworkModule(pl.LightningModule):
         :type targets: Any
         :param mode: train/val/test mode
         :type mode: str
-        :param as_numpy: flag to decide whether to return losses as np.ndarray
-        :type as_numpy: bool
 
         :return: dict of losses with list of loss values per instance
         """
