@@ -1,4 +1,4 @@
-"""Tests cac.data.audio.AudioItem"""
+"""Tests coreml.utils.wandb"""
 import unittest
 import numpy as np
 import wandb
@@ -8,7 +8,7 @@ from coreml.data.utils import read_dataset_from_config
 from coreml.utils.wandb import get_images, get_indices, get_confusion_matrix
 
 
-class WandbCase(unittest.TestCase):
+class WandbTestCase(unittest.TestCase):
     """Class to run tests on wandb util functions"""
     @classmethod
     def setUpClass(cls):

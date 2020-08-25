@@ -1,7 +1,5 @@
 import torch
 
-# TODO: test
-
 
 def is_scalar(value):
     if isinstance(value, (int, float)) or (
