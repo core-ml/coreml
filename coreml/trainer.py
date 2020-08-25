@@ -26,6 +26,7 @@ class Trainer(pl.Trainer):
         kwargs['callbacks'] = callbacks
         kwargs['checkpoint_callback'] = checkpoint_callback
         kwargs['default_root_dir'] = config.output_dir
+        super(Trainer, self).__init__(**kwargs)
 
         # define data module
         self.data_module = DataModule(
@@ -38,10 +39,8 @@ class Trainer(pl.Trainer):
             'config': config.module['config']
         }
         module_params.update(config.modes)
-        self.lightning_module = lm_factory.create(
+        self.model = lm_factory.create(
             config.module['name'], **module_params)
-
-        super(Trainer, self).__init__(**kwargs)
 
     def _get_callbacks(self, kwargs: Dict):
         callbacks = []
@@ -64,7 +63,7 @@ class Trainer(pl.Trainer):
 
     def fit(self, model=None):
         if model is None:
-            model = self.lightning_module
+            model = self.model
 
         # train the model
         super(Trainer, self).fit(model, datamodule=self.data_module)
@@ -81,11 +80,9 @@ class Trainer(pl.Trainer):
         """
         # define dataloader
         eval_dataloader = getattr(self.data_module, f'{mode}_dataloader')()
-        print(color(f'Loading checkpoint: {ckpt_path}'))
 
         # reset test_model
-        self.lightning_module.test_mode = mode
+        self.model.test_mode = mode
 
         super(Trainer, self).test(
-            self.lightning_module, eval_dataloader, ckpt_path=ckpt_path,
-            verbose=True)
+            self.model, eval_dataloader, verbose=True)

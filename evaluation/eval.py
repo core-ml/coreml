@@ -37,17 +37,6 @@ def main(args):
         logger = pl.loggers.WandbLogger(**config.logger)
         trainer_args['logger'] = logger
 
-    # add checkpoint loading values
-    # load_epoch = args.epoch
-    # load_best = args.best
-    # config.model['load']['version'] = version
-    # config.model['load']['epoch'] = load_epoch
-    # config.model['load']['load_best'] = load_best
-
-    # # ensures that the epoch_counter attribute is set to the
-    # # epoch number being loaded
-    # config.model['load']['resume_epoch'] = True
-
     print(color(f'Evaluating on mode: {args.mode}'))
     eval_mode = args.mode
     ckpt_path = args.ckpt_path
@@ -67,17 +56,19 @@ def main(args):
     for key in keys_to_remove:
         trainer_args.pop(key, None)
 
-    # restore trainer to the state at the end of training
-    # ISSUE: ideally, it should resume optimizer state and callback states
-    # as well - that does not happen - lightning issue
-    last_ckpt_path = get_last_saved_checkpoint_path(config.checkpoint_dir)
-    trainer_args['resume_from_checkpoint'] = last_ckpt_path
+    if ckpt_path == -1:
+        # restore trainer to the state at the end of training
+        # ISSUE: ideally, it should resume optimizer state and callback states
+        # as well - that does not happen - lightning issue
+        ckpt_path = get_last_saved_checkpoint_path(config.checkpoint_dir)
 
-    # define trainer object
-    trainer = Trainer(config, **trainer_args)
+    trainer_args['resume_from_checkpoint'] = ckpt_path
 
     # log which checkpoint is going to be used
     print(color(f'Using checkpoint as: {ckpt_path}'))
+
+    # define trainer object
+    trainer = Trainer(config, **trainer_args)
 
     # run evaluation
     trainer.evaluate(eval_mode, ckpt_path=ckpt_path)

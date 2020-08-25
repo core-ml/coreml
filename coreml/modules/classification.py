@@ -74,8 +74,8 @@ class BinaryClassificationModule(NeuralNetworkModule):
             # convert to sigmoid scores from logits
             predictions = torch.sigmoid(predictions)
 
-        targets = targets.clone()
-        predict_proba = predictions.clone().detach()
+        targets = targets.cpu()
+        predict_proba = predictions.detach().cpu()
 
         if classes is None:
             classes = self.config['classes']
