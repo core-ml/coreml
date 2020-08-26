@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="coreml",
-    version="0.0.9",
+    version="0.0.10",
     author="Aman Dalmia",
     author_email="amandalmia18@gmail.com",
     description="Generic Framework for ML projects",
@@ -19,15 +19,13 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        'efficientnet-pytorch==0.6.3',
-        'kornia==0.4.0',
         'matplotlib==3.2.1',
         'natsort==7.0.1',
         'numpy==1.18.2',
         'opencv-python',
         'pandas==1.0.3',
         'Pillow==7.1.1',
-        'PyYAML',
+        'PyYAML>=5.1',
         'scikit-learn==0.22.2.post1',
         'scipy==1.4.1',
         'seaborn==0.10.0',
@@ -38,7 +36,10 @@ setuptools.setup(
         'torchvision>=0.6.1',
         'tqdm==4.45.0',
         'wandb==0.9.4',
-        'xgboost==1.1.1'
+        'xgboost==1.1.1',
+        'timm==0.2.1',
+        'pytorch-lightning==0.9.0',
+        'kornia==0.4.0'
     ],
     python_requires='>=3.6',
 )
