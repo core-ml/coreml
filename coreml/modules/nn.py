@@ -363,6 +363,10 @@ class NeuralNetworkModule(pl.LightningModule):
         # log gradients and model parameters
         self.watch()
 
-    def teardown(self, stage):
-        import ipdb; ipdb.set_trace()
-        super(NeuralNetworkModule, self).teardown(stage)
+    def __class__(self):
+        return NeuralNetworkModule(
+            self.config, self.train_mode, self.val_mode, self.test_mode)
+
+    # def teardown(self, stage):
+    #     import ipdb; ipdb.set_trace()
+    #     super(NeuralNetworkModule, self).teardown(stage)
