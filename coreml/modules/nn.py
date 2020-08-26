@@ -364,9 +364,9 @@ class NeuralNetworkModule(pl.LightningModule):
         self.watch()
 
     @classmethod
-    def load_from_checkpoint(cls, **kwargs):
+    def load_from_checkpoint(cls, path, **kwargs):
         if not hasattr(cls, 'blocks'):
             cls = NeuralNetworkModule(
                 cls.config, cls.train_mode, cls.val_mode, cls.test_mode)
 
-        super(NeuralNetworkModule, cls).load_from_checkpoint(**kwargs)
+        super(NeuralNetworkModule, cls).load_from_checkpoint(path, **kwargs)
