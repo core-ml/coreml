@@ -3,8 +3,6 @@ from typing import Dict
 import pytorch_lightning as pl
 from coreml.data.dataloader import get_dataloader
 
-# TODO: tests
-
 
 class DataModule(pl.LightningDataModule):
     """Extends LightningDataModule

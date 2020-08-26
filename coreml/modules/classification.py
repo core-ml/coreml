@@ -13,12 +13,6 @@ from coreml.utils.viz import plot_classification_metric_curve
 from coreml.utils.wandb import get_confusion_matrix
 from coreml.utils.logger import color
 
-# TODO:
-# test with TPU
-# model checkpoint loading with weights not exactly matching
-# model checkpoint loading for transfer learning but not restoring
-# epoch and global_step
-
 
 class BinaryClassificationModule(NeuralNetworkModule):
     """LightningModule for binary classification"""
