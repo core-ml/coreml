@@ -35,16 +35,17 @@ class NeuralNetworkModule(pl.LightningModule):
             self, config: Dict, train_mode: str = 'train',
             val_mode: str = 'val', test_mode: str = 'test'):
         super(NeuralNetworkModule, self).__init__()
-        self.config = config
-        print(config)
-        self.network_config = config['network']
         self.train_mode = train_mode
         self.val_mode = val_mode
         self.test_mode = test_mode
 
-        # build and initialize the network
-        self._build_network()
-        self._init_network()
+        if config:
+            self.config = config
+            self.network_config = config['network']
+
+            # build and initialize the network
+            self._build_network()
+            self._init_network()
 
     def _build_network(self):
         """Defines method to build the network"""
