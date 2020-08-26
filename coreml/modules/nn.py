@@ -39,22 +39,15 @@ class NeuralNetworkModule(pl.LightningModule):
         self.val_mode = val_mode
         self.test_mode = test_mode
 
-        if config:
-            self.config = config
-            self.network_config = config['network']
+        self.config = config
+        self.network_config = config['network']
 
-            # build and initialize the network
-            self._build_network()
-            self._init_network()
+        # build and initialize the network
+        self._build_network()
+        self._init_network()
 
-            NeuralNetworkModule._set_class_attributes(
-                config=config, train_mode=train_mode, val_mode=val_mode,
-                test_mode=test_mode)
-
-    @classmethod
-    def _set_class_attributes(cls, **kwargs):
-        for key, value in kwargs.items():
-            setattr(cls, key, value)
+        # save all hyperparameters
+        self.save_hyperparameters()
 
     def _build_network(self):
         """Defines method to build the network"""
@@ -371,11 +364,3 @@ class NeuralNetworkModule(pl.LightningModule):
     def on_fit_start(self):
         # log gradients and model parameters
         self.watch()
-
-    @classmethod
-    def load_from_checkpoint(cls, path, **kwargs):
-        if not hasattr(cls, 'blocks'):
-            cls = NeuralNetworkModule(
-                cls.config, cls.train_mode, cls.val_mode, cls.test_mode)
-
-        super(NeuralNetworkModule, cls).load_from_checkpoint(path, **kwargs)
