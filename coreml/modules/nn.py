@@ -363,9 +363,10 @@ class NeuralNetworkModule(pl.LightningModule):
         # log gradients and model parameters
         self.watch()
 
-    def load_from_checkpoint(self, **kwargs):
-        if not hasattr(self, 'blocks'):
-            self = NeuralNetworkModule(
-                self.config, self.train_mode, self.val_mode, self.test_mode)
+    @classmethod
+    def load_from_checkpoint(cls, **kwargs):
+        if not hasattr(cls, 'blocks'):
+            cls = NeuralNetworkModule(
+                cls.config, cls.train_mode, cls.val_mode, cls.test_mode)
 
-        super(NeuralNetworkModule, self).load_from_checkpoint(**kwargs)
+        super(NeuralNetworkModule, cls).load_from_checkpoint(**kwargs)
