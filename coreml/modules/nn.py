@@ -47,6 +47,15 @@ class NeuralNetworkModule(pl.LightningModule):
             self._build_network()
             self._init_network()
 
+            NeuralNetworkModule._set_class_attributes(
+                config=config, train_mode=train_mode, val_mode=val_mode,
+                test_mode=test_mode)
+
+    @classmethod
+    def _set_class_attributes(cls, **kwargs):
+        for key, value in kwargs.items():
+            setattr(cls, key, value)
+
     def _build_network(self):
         """Defines method to build the network"""
         self.blocks = nn.Sequential()
