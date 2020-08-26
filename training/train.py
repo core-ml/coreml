@@ -57,9 +57,10 @@ if __name__ == '__main__':
                         type=int, help='number of CPU workers to use')
     parser.add_argument('--id', type=str, default=None,
                         help='experiment ID in wandb')
-    parser.add_argument('--wandb', action='store_false',
-                        help='whether to ignore using wandb')
+    parser.add_argument('--wandb', action='store_true',
+                        help='whether to use wandb')
     parser.add_argument('--seed', type=int, default=42,
                         help='seed for the experiment')
     args = parser.parse_args()
+    import ipdb; ipdb.set_trace()
     main(args)
