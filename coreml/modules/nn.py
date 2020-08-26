@@ -362,3 +362,7 @@ class NeuralNetworkModule(pl.LightningModule):
     def on_fit_start(self):
         # log gradients and model parameters
         self.watch()
+
+    def teardown(self, stage):
+        import ipdb; ipdb.set_trace()
+        super(NeuralNetworkModule, self).teardown(stage)
