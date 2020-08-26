@@ -36,7 +36,10 @@ class NeuralNetworkModule(pl.LightningModule):
             val_mode: str = 'val', test_mode: str = 'test'):
         super(NeuralNetworkModule, self).__init__()
         self.config = config
-        self.network_config = config['network']
+        try:
+            self.network_config = config['network']
+        except:
+            import ipdb; ipdb.set_trace()
         self.train_mode = train_mode
         self.val_mode = val_mode
         self.test_mode = test_mode
