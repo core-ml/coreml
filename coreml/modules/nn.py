@@ -3,6 +3,7 @@ from typing import Dict, Tuple, Any, Union, Set
 from collections import OrderedDict, defaultdict
 import logging
 from abc import abstractmethod
+from copy import deepcopy
 
 import numpy as np
 import torch
@@ -105,7 +106,7 @@ class NeuralNetworkModule(pl.LightningModule):
     def configure_optimizers(self):
         """Setup optimizers and schedulers to be used while training"""
         # logging.info(color("Setting up the optimizer ..."))
-        kwargs = self.config['optimizer']['args']
+        kwargs = deepcopy(self.config['optimizer']['args'])
         kwargs.update({'params': self.blocks.parameters()})
         optimizer = optimizer_factory.create(
             self.config['optimizer']['name'],
@@ -114,7 +115,7 @@ class NeuralNetworkModule(pl.LightningModule):
         if 'scheduler' not in self.config['optimizer']:
             return optimizer
 
-        scheduler_config = self.config['optimizer']['scheduler']
+        scheduler_config = deepcopy(self.config['optimizer']['scheduler'])
         scheduler_config['init_params']['optimizer'] = optimizer
 
         scheduler = {
