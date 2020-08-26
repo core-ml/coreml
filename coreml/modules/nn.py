@@ -47,7 +47,7 @@ class NeuralNetworkModule(pl.LightningModule):
         self._init_network()
 
         # save all hyperparameters
-        # self.save_hyperparameters()
+        self.save_hyperparameters()
 
     def _build_network(self):
         """Defines method to build the network"""
