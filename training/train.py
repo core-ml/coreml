@@ -62,5 +62,4 @@ if __name__ == '__main__':
     parser.add_argument('--seed', type=int, default=42,
                         help='seed for the experiment')
     args = parser.parse_args()
-    import ipdb; ipdb.set_trace()
     main(args)
