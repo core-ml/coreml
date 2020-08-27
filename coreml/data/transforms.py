@@ -2,9 +2,13 @@ from typing import List, Any, Union, Tuple, Callable, Optional
 import torch
 import torch.nn.functional as F
 import kornia
-from fastai.vision import imagenet_stats, cifar_stats, mnist_stats
 from coreml.factory import Factory
 from coreml.utils.typing import TransformDict
+
+# dataset statistics for standard datasets
+imagenet_stats = ([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+cifar_stats = ([0.491, 0.482, 0.447], [0.247, 0.243, 0.261])
+mnist_stats = ([0.131], [0.308])
 
 
 class Transpose:
@@ -245,11 +249,11 @@ class Normalize(KorniaBase):
     def _check_params(mean, std):
         if isinstance(mean, str):
             assert mean in ['imagenet', 'cifar', 'mnist']
-            mean = eval(f'{mean}_stats')[0]
+            mean = locals()(f'{mean}_stats')[0]
 
         if isinstance(std, str):
             assert std in ['imagenet', 'cifar', 'mnist']
-            std = eval(f'{std}_stats')[1]
+            std = locals()(f'{std}_stats')[1]
 
         if not isinstance(mean, torch.Tensor):
             mean = torch.FloatTensor(mean)
