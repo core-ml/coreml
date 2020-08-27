@@ -70,9 +70,9 @@ class Config:
         params['logger'] = params.get('logger', {})
 
         # sampler
-        params['data']['sampler'] = params['data'].get('sampler', {})
-        params['data']['dataset']['params'] = params['data']['dataset'].get(
-            'params', {})
+        # params['data']['sampler'] = params['data'].get('sampler', {})
+        # params['data']['dataset']['params'] = params['data']['dataset'].get(
+        #     'params', {})
 
         # evaluation
         params['module']['config']['eval'] = params['module']['config'].get(
