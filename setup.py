@@ -21,14 +21,11 @@ setuptools.setup(
     install_requires=[
         'matplotlib==3.2.1',
         'natsort==7.0.1',
-        'numpy==1.18.2',
         'opencv-python',
         'pandas==1.0.3',
         'Pillow==7.1.1',
         'PyYAML>=5.1',
         'scikit-learn==0.22.2.post1',
-        'scipy==1.4.1',
-        'seaborn==0.10.0',
         'termcolor==1.1.0',
         'torch==1.6.0',
         'torchsummary==1.5.1',
@@ -40,7 +37,8 @@ setuptools.setup(
         'xgboost==1.1.1',
         'timm==0.2.1',
         'pytorch-lightning==0.9.0',
-        'kornia==0.4.0'
+        'kornia==0.4.0',
+        'catalyst=20.06'
     ],
     python_requires='>=3.6',
 )

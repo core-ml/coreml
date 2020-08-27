@@ -95,46 +95,52 @@ def get_dataloader(
     if batch_size == -1:
         batch_size = len(dataset)
 
-    # define sampler
-    sampler = None
-
-    # use custom sampler if defined in the config
-    if 'sampler' in cfg:
-        sampler_cfg = cfg['sampler'].get(mode, {'name': 'default'})
-        sampler_params = sampler_cfg.get('params', {})
-        sampler_params.update({
-            'dataset': dataset,
-            'shuffle': shuffle,
-            'target_transform': target_transform
-        })
-        sampler = sampler_factory.create(sampler_cfg['name'], **sampler_params)
-
-        # check if distributed and TPU
-        if sampler_cfg.get('device', '') == 'tpu':
-            # import torch_xla
-            import torch_xla.core.xla_model as xm
-
-            # create a distributed sampler wrapper on top
-            # of the sampler
-            sampler = DistributedSamplerWrapper(
-                sampler, {
-                    'shuffle': shuffle,
-                    'num_replicas': xm.xrt_world_size(),
-                    'rank': xm.get_ordinal()
-                })
-
     # define the collate function for accumulating a batch
     collate_fn = partial(eval(cfg['collate_fn']['name']),
                          **cfg['collate_fn'].get('params', {}))
 
-    # define DataLoader object
-    dataloader = DataLoader(
+    # use custom sampler if defined in the config
+    if 'sampler' not in cfg:
+        # define DataLoader object
+        return DataLoader(
+            dataset=dataset,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            drop_last=drop_last,
+            collate_fn=collate_fn,
+            pin_memory=True)
+
+    # use custom sampler
+    sampler_cfg = cfg['sampler'].get(mode, {'name': 'default'})
+    sampler_params = sampler_cfg.get('params', {})
+    sampler_params.update({
+        'dataset': dataset,
+        'shuffle': shuffle,
+        'target_transform': target_transform
+    })
+    sampler = sampler_factory.create(sampler_cfg['name'], **sampler_params)
+
+    # check if distributed and TPU
+    if sampler_cfg.get('device', '') == 'tpu':
+        # import torch_xla
+        import torch_xla.core.xla_model as xm
+
+        # create a distributed sampler wrapper on top
+        # of the sampler
+        sampler = DistributedSamplerWrapper(
+            sampler, {
+                'shuffle': shuffle,
+                'num_replicas': xm.xrt_world_size(),
+                'rank': xm.get_ordinal()
+            })
+
+    # use a different dataloader definition as pytorch-lightning
+    # considers sampler=None as having provided custom sampler as well
+    return DataLoader(
         dataset=dataset,
         batch_size=batch_size,
-        sampler=sampler,
         num_workers=num_workers,
+        sampler=sampler,
         drop_last=drop_last,
         collate_fn=collate_fn,
         pin_memory=True)
-
-    return dataloader
