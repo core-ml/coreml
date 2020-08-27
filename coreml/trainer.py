@@ -65,6 +65,8 @@ class Trainer(pl.Trainer):
         if model is None:
             model = self.model
 
+        import ipdb; ipdb.set_trace()
+
         # train the model
         super(Trainer, self).fit(model, datamodule=self.data_module)
 
