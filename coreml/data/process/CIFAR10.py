@@ -1,5 +1,6 @@
 import os
 from os.path import join, exists
+import argparse
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -8,13 +9,19 @@ from torchvision.datasets import CIFAR10
 from sklearn.model_selection import train_test_split
 from coreml.utils.io import save_yml
 
+parser = argparse.ArgumentParser(
+    description="Download and prepare CIFAR10")
+parser.add_argument('-d', '--data', default='/data', type=str,
+                    help='path where the CIFAR10 dataset will be stored')
+args = parser.parse_args()
+
 # load train split
-train = CIFAR10('/data/CIFAR10/raw', download=True)
+train = CIFAR10(join(args.data, 'CIFAR10/raw'), download=True)
 
 # load test split
-test = CIFAR10('/data/CIFAR10/raw', train=False, download=True)
+test = CIFAR10(join(args.data, 'CIFAR10/raw'), train=False, download=True)
 
-processed_dir = '/data/CIFAR10/processed'
+processed_dir = join(args.data, 'CIFAR10/processed')
 os.makedirs(processed_dir, exist_ok=True)
 
 print(f'Train data shape: {train.data.shape}')
