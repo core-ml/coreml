@@ -69,29 +69,9 @@ class Config:
         # logger
         params['logger'] = params.get('logger', {})
 
-        # metrics
-        # params['metrics_to_track'] = params.get('metrics_to_track', [
-        #     'auc-roc', 'precision', 'specificity', 'recall'])
-        # params['allow_val_change'] = params.get('allow_val_change', False)
-
-        # sampler
-        params['data']['sampler'] = params['data'].get('sampler', {})
-        params['data']['dataset']['params'] = params['data']['dataset'].get(
-            'params', {})
-
-        # defaults for loading checkpoints
-        # if 'load' in params['model']:
-        #     load_config = params['model']['load']
-        #     load_config['resume_optimizer'] = load_config.get(
-        #         'resume_optimizer', False)
-        #     load_config['resume_epoch'] = load_config.get(
-        #         'resume_epoch', load_config['resume_optimizer'])
-        #     params['model']['load'] = load_config
-
         # evaluation
-        # params['model']['eval'] = params['model'].get('eval', {})
-        # params['model']['eval']['maximize_metric'] = params['model']['eval'].get(
-        #     'maximize_metric', 'specificity')
+        params['module']['config']['eval'] = params['module']['config'].get(
+            'eval', {'maximize_metric': 'specificity'})
 
         return params
 
