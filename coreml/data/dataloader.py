@@ -95,14 +95,18 @@ def get_dataloader(
         batch_size = len(dataset)
 
     # define sampler
-    sampler_cfg = cfg['sampler'].get(mode, {'name': 'default'})
-    sampler_params = sampler_cfg.get('params', {})
-    sampler_params.update({
-        'dataset': dataset,
-        'shuffle': shuffle,
-        'target_transform': target_transform
-    })
-    sampler = sampler_factory.create(sampler_cfg['name'], **sampler_params)
+    sampler = None
+
+    # use custom sampler if defined in the config
+    if 'sampler' in cfg:
+        sampler_cfg = cfg['sampler'].get(mode, {'name': 'default'})
+        sampler_params = sampler_cfg.get('params', {})
+        sampler_params.update({
+            'dataset': dataset,
+            'shuffle': shuffle,
+            'target_transform': target_transform
+        })
+        sampler = sampler_factory.create(sampler_cfg['name'], **sampler_params)
 
     # define the collate function for accumulating a batch
     collate_fn = partial(eval(cfg['collate_fn']['name']),
