@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="coreml",
-    version="0.0.12",
+    version="0.0.13",
     author="Aman Dalmia",
     author_email="amandalmia18@gmail.com",
     description="Generic Framework for ML projects",
@@ -30,10 +30,11 @@ setuptools.setup(
         'scipy==1.4.1',
         'seaborn==0.10.0',
         'termcolor==1.1.0',
-        'torch>=1.5.0',
+        'torch==1.6.0',
         'torchsummary==1.5.1',
         'torchtext==0.4.0',
-        'torchvision>=0.6.1',
+        'torchvision==0.7.0',
+        'torchaudio==0.6.0',
         'tqdm==4.45.0',
         'wandb==0.9.4',
         'xgboost==1.1.1',
