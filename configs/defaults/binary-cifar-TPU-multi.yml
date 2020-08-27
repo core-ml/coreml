@@ -1,0 +1,154 @@
+description: default config for binary CIFAR10 classification
+logger:
+  entity: dalmiaman
+  project: test-lightning
+
+trainer:
+  # batch-size scaled up by the number of cores
+  batch_size: 512
+  params:
+    tpu_cores:
+      - 8
+    max_epochs: 100
+    weights_summary: full
+
+module:
+  name: binary-classification
+  config:
+    # optimization
+    optimizer:
+      name: SGD
+      args:
+        # lr scaled up by the number of cores
+        lr: 0.008
+        momentum: 0.9
+        nesterov: true
+      scheduler:
+        name: StepLR
+        init_params:
+            gamma: 0.9
+            step_size: 1
+        opt_params:
+          interval: epoch
+
+    # loss function
+    loss:
+      train:
+        name: binary-cross-entropy
+        params:
+            reduction: none
+      val:
+        name: binary-cross-entropy
+        params:
+            reduction: none
+      test:
+        name: binary-cross-entropy
+        params:
+            reduction: none
+
+    # meta
+    classes:
+      - 0
+      - 1
+
+    # model checkpoint
+    checkpoint:
+      period: 1
+      monitor: loss
+      verbose: true
+      mode: min
+      save_weights_only: false
+      save_top_k: -1
+
+    # resuming model checkpoint
+    # TODO
+    load:
+      version: null
+      epoch: -1
+      load_best: False
+      resume_optimizer: False
+
+    # evaluation
+    eval:
+      maximize_metric: precision
+
+    # neural net architecture
+    network:
+      config:
+        - name: Conv2d
+          params:
+            in_channels: 3
+            out_channels: 64
+            kernel_size: 3
+        - name: BatchNorm2d
+          params:
+            num_features: 64
+        - name: ReLU
+          params: {}
+        - name: Conv2d
+          params:
+            in_channels: 64
+            out_channels: 64
+            kernel_size: 3
+        - name: BatchNorm2d
+          params:
+            num_features: 64
+        - name: ReLU
+          params: {}
+        - name: AdaptiveAvgPool2d
+          params:
+            output_size:
+            - 1
+            - 1
+        - name: Flatten
+          params: {}
+        - name: Linear
+          params:
+            in_features: 64
+            out_features: 64
+        - name: ReLU
+          params: {}
+        - name: Linear
+          params:
+            in_features: 64
+            out_features: 1
+data:
+  data_type: image
+  target_transform:
+    name: classification
+    params:
+      classes:
+        - 0
+        - 1
+  signal_transform:
+    train:
+    - name: Permute
+      params:
+        order:
+          - 2
+          - 0
+          - 1
+    val:
+    - name: Permute
+      params:
+        order:
+          - 2
+          - 0
+          - 1
+
+    test:
+    - name: Permute
+      params:
+        order:
+          - 2
+          - 0
+          - 1
+  dataset:
+    name: classification_dataset
+    config:
+      - name: CIFAR10
+        version: binary
+    params: {}
+  collate_fn:
+    name: classification_collate
+    params: {}
