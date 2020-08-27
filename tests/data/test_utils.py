@@ -19,7 +19,7 @@ class DataUtilTestCase(unittest.TestCase):
     def setUpClass(cls):
         if not exists(join(DATA_ROOT, 'CIFAR10')):
             subprocess.call(
-                'python /workspace/coreml/tasks/data/classification/CIFAR10.py',
+                'python /workspace/coreml/coreml/data/process/CIFAR10.py',
                 shell=True)
 
     def test_read_dataset_from_config(self):
