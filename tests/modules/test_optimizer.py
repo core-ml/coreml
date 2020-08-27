@@ -45,7 +45,7 @@ class OptimizerTestCase(unittest.TestCase):
         }
 
         optimizer = optimizer_factory.create(optimizer_name, **optimizer_args)
-        self.assertTrue(optimizer_name in optimizer.__doc__)
+        self.assertTrue(optimizer_name in optimizer.__str__())
 
     def test_sgd(self):
         """Test creation of a SGD optimizer"""
@@ -57,7 +57,26 @@ class OptimizerTestCase(unittest.TestCase):
         }
 
         optimizer = optimizer_factory.create(optimizer_name, **optimizer_args)
-        self.assertTrue(optimizer_name in optimizer.__doc__)
+        self.assertTrue(optimizer_name in optimizer.__str__())
+
+    def test_lookahead(self):
+        """Test creation of a LookAhead + RAdam optimizer"""
+        optimizer_name = 'RAdam'
+        optimizer_args = {
+            'lr': 0.0003,
+            'weight_decay': 0.0005
+        }
+
+        lookahead_cfg = {
+            'params': self.network.parameters(),
+            'optimizer': {
+                'name': optimizer_name,
+                'args': optimizer_args
+            }
+        }
+
+        optimizer = optimizer_factory.create('Lookahead', **lookahead_cfg)
+        self.assertTrue('Lookahead' in optimizer.__str__())
 
 
 if __name__ == "__main__":

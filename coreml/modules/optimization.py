@@ -1,4 +1,6 @@
 """Defines Factory object to register various optimizers"""
+from typing import Generator
+from torch.nn.parameter import Parameter
 from torch.optim import Adam, SGD, AdamW, Optimizer
 from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR, CyclicLR, \
     OneCycleLR, MultiStepLR
@@ -7,7 +9,17 @@ from coreml.factory import Factory
 
 
 class Lookahead(optim.Lookahead):
-    def __init__(self, params, optimizer: str, alpha=0.5, k=6):
+    """Refer to timm/optim/lookahead.py for information on alpha and k
+
+    :param params: parameters of the module whose weights are optimized
+    :type params: Generator[Parameter, None, None]
+    :param optimizer: Dictionary containing the name of the optimizer
+        and the optimizer params
+    :type optimizer: dict
+    """
+    def __init__(
+            self, params: Generator[Parameter, None, None], optimizer: dict,
+            alpha=0.5, k=6):
         optimizer['args']['params'] = params
         optimizer = optimizer_factory.create(
             optimizer['name'], **optimizer['args'])
