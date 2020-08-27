@@ -11,7 +11,6 @@ trainer:
       - 8
     max_epochs: 100
     weights_summary: full
-    replace_sampler_ddp: false
 
 module:
   name: binary-classification
