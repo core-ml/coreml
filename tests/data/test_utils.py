@@ -8,13 +8,7 @@ from coreml.data.utils import read_dataset_from_config
 
 
 class DataUtilTestCase(unittest.TestCase):
-    """Class to run tests on coreml.data.utils.py
-
-    Tests the following cases
-    - Flusense dataset with default config
-    - Flusense dataset with split audio segments config
-    - Stonybrook dataset with default config
-    """
+    """Class to run tests on coreml.data.utils.py"""
     @classmethod
     def setUpClass(cls):
         if not exists(join(DATA_ROOT, 'CIFAR10')):
