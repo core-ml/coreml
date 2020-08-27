@@ -7,6 +7,7 @@ from typing import Tuple, Dict, List
 import torch
 import numpy as np
 from torch.utils.data import DataLoader, Dataset
+from catalyst.data.sampler import DistributedSamplerWrapper
 from coreml.data import dataset_factory
 from coreml.data.sampler import sampler_factory
 from coreml.data.transforms import DataProcessor, annotation_factory
@@ -107,6 +108,20 @@ def get_dataloader(
             'target_transform': target_transform
         })
         sampler = sampler_factory.create(sampler_cfg['name'], **sampler_params)
+
+        # check if distributed and TPU
+        if sampler_cfg.get('device', '') == 'tpu':
+            # import torch_xla
+            import torch_xla.core.xla_model as xm
+
+            # create a distributed sampler wrapper on top
+            # of the sampler
+            sampler = DistributedSamplerWrapper(
+                sampler, {
+                    'shuffle': shuffle,
+                    'num_replicas': xm.xrt_world_size(),
+                    'rank': xm.get_ordinal()
+                })
 
     # define the collate function for accumulating a batch
     collate_fn = partial(eval(cfg['collate_fn']['name']),

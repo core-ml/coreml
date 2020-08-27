@@ -1,4 +1,4 @@
-description: default config for binary CIFAR10 classification
+description: default config for binary CIFAR10 classification + TPU multi-core
 logger:
   entity: dalmiaman
   project: test-lightning

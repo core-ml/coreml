@@ -1,13 +1,14 @@
-description: default config for binary CIFAR10 classification + TPU single core
+description: default config for binary CIFAR10 classification + TPU multi-core + custom sampler
 logger:
   entity: dalmiaman
   project: test-lightning
 
 trainer:
-  batch_size: 64
+  # batch-size scaled up by the number of cores
+  batch_size: 512
   params:
     tpu_cores:
-      - 1
+      - 8
     max_epochs: 100
     weights_summary: full
 
@@ -18,7 +19,8 @@ module:
     optimizer:
       name: SGD
       args:
-        lr: 0.001
+        # lr scaled up by the number of cores
+        lr: 0.008
         momentum: 0.9
         nesterov: true
       scheduler:
@@ -147,6 +149,14 @@ data:
       - name: CIFAR10
         version: binary
     params: {}
+
+  sampler:
+    train:
+        name: classification
+        params:
+            mode: balanced
+        device: tpu
+
   collate_fn:
     name: classification_collate
     params: {}
