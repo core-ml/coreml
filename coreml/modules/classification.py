@@ -221,8 +221,8 @@ class MultiClassClassificationModule(BinaryClassificationModule):
 
         :return: dictionary of metrics
         """
-        targets = targets.clone()
-        predicted_labels = torch.argmax(predictions, dim=1).clone().detach()
+        targets = targets.cpu()
+        predicted_labels = torch.argmax(predictions, dim=1).detach().cpu()
 
         if classes is None:
             classes = self.config['classes']
