@@ -1,9 +1,10 @@
 """Custom sampler for loading data"""
 import random
-from typing import List, Any
+from typing import List, Any, Optional
 from collections import defaultdict
 import numpy as np
 from torch.utils.data.sampler import Sampler
+from torch.utils.data.distributed import DistributedSampler
 from torch.utils.data import Dataset
 from coreml.factory import Factory
 
@@ -126,6 +127,25 @@ class ClassificationDataSampler(DataSampler):
         assert isinstance(dataset.items[0].label, dict)
         if target_transform is not None:
             assert hasattr(target_transform, 'classes')
+
+
+class DistributedSamplerWrapper(DistributedSampler):
+    def __init__(
+            self, sampler,
+            num_replicas: Optional[int] = None,
+            rank: Optional[int] = None,
+            shuffle: bool = True):
+        super(DistributedSamplerWrapper, self).__init__(
+            sampler.dataset, num_replicas, rank, shuffle)
+        self.sampler = Sampler
+
+    def __iter__(self):
+        indices = list(self.sampler)
+        indices = indices[self.rank:self.total_size:self.num_replicas]
+        return iter(indices)
+
+    def __len__(self):
+        return len(self.sampler)
 
 
 sampler_factory = Factory()
