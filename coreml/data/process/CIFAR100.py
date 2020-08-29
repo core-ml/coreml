@@ -5,19 +5,19 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import cv2
-from torchvision.datasets import CIFAR10
+from torchvision.datasets import CIFAR100
 from sklearn.model_selection import train_test_split
 from coreml.utils.io import save_yml
 
 
 def download_and_process(data_dir):
     # load train split
-    train = CIFAR10(join(data_dir, 'CIFAR10/raw'), download=True)
+    train = CIFAR100(join(data_dir, 'CIFAR100/raw'), download=True)
 
     # load test split
-    test = CIFAR10(join(data_dir, 'CIFAR10/raw'), train=False, download=True)
+    test = CIFAR100(join(data_dir, 'CIFAR100/raw'), train=False, download=True)
 
-    processed_dir = join(data_dir, 'CIFAR10/processed')
+    processed_dir = join(data_dir, 'CIFAR100/processed')
     os.makedirs(processed_dir, exist_ok=True)
 
     print(f'Train data shape: {train.data.shape}')
@@ -119,7 +119,7 @@ def download_and_process(data_dir):
     print(f'Saving version file to {version_path}')
     save_yml(version_path, version)
 
-    # ------- create the binary CIFAR10 version ------- #
+    # ------- create the binary CIFAR100 version ------- #
     binary_classes = [0, 1]
     print('Get binary indices')
     binary_indices = np.where(
@@ -205,8 +205,8 @@ def download_and_process(data_dir):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description="Download and prepare CIFAR10")
+        description="Download and prepare CIFAR100")
     parser.add_argument('-d', '--data', default='/data', type=str,
-                        help='path where the CIFAR10 dataset will be stored')
+                        help='path where the CIFAR100 dataset will be stored')
     args = parser.parse_args()
     download_and_process(args.data)
