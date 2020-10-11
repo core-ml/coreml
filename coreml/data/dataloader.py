@@ -124,8 +124,6 @@ def get_dataloader(
         if sampler_cfg.get('device', '') == 'tpu':
             import torch_xla.core.xla_model as xm
 
-            import ipdb; ipdb.set_trace()
-
             # create a distributed sampler wrapper on top
             # of the sampler
             sampler = DistributedSamplerWrapper(
