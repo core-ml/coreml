@@ -1,6 +1,7 @@
 """Contains functions for loading data"""
 # pylint: disable=no-member
 import logging
+import inspect
 from functools import partial
 from collections import defaultdict
 from typing import Tuple, Dict, List
@@ -108,8 +109,8 @@ def get_dataloader(
         sampler_params = sampler_cfg.get('params', {})
         sampler_params['data_source'] = dataset
 
-        sampler_args = sampler_factory.get_builder(
-            sampler_cfg['name']).__code__.co_varnames
+        sampler_args = inspect.getfullargspec(sampler_factory.get_builder(
+            sampler_cfg['name'])).args
 
         if 'shuffle' in sampler_args:
             sampler_params['shuffle'] = shuffle
