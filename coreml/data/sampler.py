@@ -139,7 +139,7 @@ class DistributedSamplerWrapper(DistributedSampler):
             rank: Optional[int] = None,
             shuffle: bool = True):
         super(DistributedSamplerWrapper, self).__init__(
-            sampler.dataset, num_replicas, rank, shuffle)
+            sampler.data_source, num_replicas, rank, shuffle)
         self.sampler = sampler
 
     def __iter__(self):
