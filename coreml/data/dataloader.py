@@ -106,18 +106,21 @@ def get_dataloader(
     if 'sampler' in cfg:
         sampler_cfg = cfg['sampler'].get(mode, {'name': 'default'})
         sampler_params = sampler_cfg.get('params', {})
-        sampler_params.update({
-            'dataset': dataset,
-            'shuffle': shuffle,
-            'target_transform': target_transform
-        })
+        sampler_params['data_source'] = dataset
+
+        sampler_args = sampler_factory.get_builder(
+            sampler_cfg['name']).__code__.co_varnames
+
+        if 'shuffle' in sampler_args:
+            sampler_params['shuffle'] = shuffle
+
+        if 'target_transform' in sampler_args:
+            sampler_params['target_transform'] = target_transform
+
         sampler = sampler_factory.create(sampler_cfg['name'], **sampler_params)
 
         # check if distributed and TPU
         if sampler_cfg.get('device', '') == 'tpu':
-            # import torch_xla
-            import torch_xla.core.xla_model as xm
-
             # create a distributed sampler wrapper on top
             # of the sampler
             sampler = DistributedSamplerWrapper(

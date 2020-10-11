@@ -155,7 +155,7 @@ data:
     train:
         name: classification
         params:
-            mode: balanced
+            mode: random
         device: tpu
 
   collate_fn:

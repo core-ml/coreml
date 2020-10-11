@@ -16,6 +16,13 @@ class Factory:
         """
         self._builders[key] = builder
 
+    def get_builder(self, key: str) -> Any:
+        """Returns the given builder corresponding to the key
+        Args:
+            key (str): key corresponding to the builder
+        """
+        return self._builders[key]
+
     def create(self, key: str, **kwargs):
         """Instantiates a new builder object, once it's registered
         Args:

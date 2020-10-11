@@ -3,7 +3,7 @@ import random
 from typing import List, Any, Optional
 from collections import defaultdict
 import numpy as np
-from torch.utils.data.sampler import Sampler
+from torch.utils.data.sampler import Sampler, RandomSampler
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.data import Dataset
 from coreml.factory import Factory
@@ -15,8 +15,8 @@ class DataSampler(Sampler):
     This retains the functionality of the default PyTorch sampler.
     Added here to serve as the base for adding more functionality.
 
-    :param dataset: the dataset object from which to sample
-    :type dataset: :class:`~torch.utils.data.Dataset`
+    :param data_source: the dataset object from which to sample
+    :type data_source: :class:`~torch.utils.data.Dataset`
     :param shuffle: decides the functionality for the sampler,
         defaults to True
     :type shuffle: bool, optional
@@ -25,13 +25,13 @@ class DataSampler(Sampler):
     :param kwargs: additional params as dict
     :type kwargs: dict
     """
-    def __init__(self, dataset: Dataset, shuffle: bool = True, seed: int = 0,
-                 **kwargs):
-        super(DataSampler, self).__init__(dataset)
-        self.dataset = dataset
+    def __init__(self, data_source: Dataset, shuffle: bool = True,
+                 seed: int = 0, **kwargs):
+        super(DataSampler, self).__init__(data_source)
+        self.data_source = data_source
         self.shuffle = shuffle
         random.seed(seed)
-        self.len = len(dataset)
+        self.len = len(data_source)
 
     def load_fn(self):
         """Default behaviour as :class:`~torch.utils.sampler.Sampler`"""
@@ -51,8 +51,8 @@ class DataSampler(Sampler):
 class ClassificationDataSampler(DataSampler):
     """Custom sampler to decide the ordering of samples for classification
 
-    :param dataset: the dataset object from which to sample
-    :type dataset: :class:`~torch.utils.data.Dataset`
+    :param data_source: the dataset object from which to sample
+    :type data_source: :class:`~torch.utils.data.Dataset`
     :param shuffle: decides the functionality for the sampler,
         defaults to True
     :type shuffle: bool, optional
@@ -69,15 +69,17 @@ class ClassificationDataSampler(DataSampler):
         to `default`
     :type mode: str, optional
     """
-    def __init__(self, dataset: Dataset, shuffle: bool = True, seed: int = 0,
-                 target_transform: Any = None, mode: str = 'default'):
-        super(ClassificationDataSampler, self).__init__(dataset, shuffle, seed)
-        self._check_params(dataset, shuffle, target_transform, mode)
+    def __init__(self, data_source: Dataset, shuffle: bool = True,
+                 seed: int = 0, target_transform: Any = None,
+                 mode: str = 'default'):
+        super(ClassificationDataSampler, self).__init__(
+            data_source, shuffle, seed)
+        self._check_params(data_source, shuffle, target_transform, mode)
         self.mode = mode
 
         if mode == 'balanced':
             self.labels = [
-                item.label['classification'] for item in dataset.items]
+                item.label['classification'] for item in data_source.items]
             if target_transform is not None:
                 self.labels = np.array([target_transform(
                     label) for label in self.labels])
@@ -92,7 +94,8 @@ class ClassificationDataSampler(DataSampler):
 
             # tracks the minimum number of examples across classes
             self.min_count = min(
-                [len(indices) for _, indices in self.label_indices_map.items()])
+                [len(indices) for _, indices in self.label_indices_map.items()]
+            )
             self.load_fn = self.load_balanced
 
             # length = number of classes * min_count
@@ -119,12 +122,12 @@ class ClassificationDataSampler(DataSampler):
         return indices
 
     @staticmethod
-    def _check_params(dataset, shuffle, target_transform, mode):
+    def _check_params(data_source, shuffle, target_transform, mode):
         assert mode in ['default', 'balanced']
         if mode == 'default':
             return
 
-        assert isinstance(dataset.items[0].label, dict)
+        assert isinstance(data_source.items[0].label, dict)
         if target_transform is not None:
             assert hasattr(target_transform, 'classes')
 
@@ -150,4 +153,5 @@ class DistributedSamplerWrapper(DistributedSampler):
 
 sampler_factory = Factory()
 sampler_factory.register_builder('default', DataSampler)
+sampler_factory.register_builder('random', RandomSampler)
 sampler_factory.register_builder('classification', ClassificationDataSampler)
