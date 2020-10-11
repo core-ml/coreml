@@ -8,7 +8,6 @@ from typing import Tuple, Dict, List
 import torch
 import numpy as np
 from torch.utils.data import DataLoader, Dataset
-# from catalyst.data.sampler import DistributedSamplerWrapper
 from coreml.data import dataset_factory
 from coreml.data.sampler import sampler_factory, DistributedSamplerWrapper
 from coreml.data.transforms import DataProcessor, annotation_factory

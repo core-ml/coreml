@@ -38,7 +38,6 @@ setuptools.setup(
         'timm==0.2.1',
         'pytorch-lightning==0.9.0',
         'kornia==0.4.0',
-        'catalyst=20.06'
     ],
     python_requires='>=3.6',
 )
