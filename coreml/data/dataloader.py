@@ -129,11 +129,9 @@ def get_dataloader(
             # create a distributed sampler wrapper on top
             # of the sampler
             sampler = DistributedSamplerWrapper(
-                sampler, {
-                    'shuffle': shuffle,
-                    'rank': xm.get_ordinal(),
-                    'num_replicas': xm.xrt_world_size()
-                })
+                sampler, shuffle=shuffle,
+                rank=xm.get_ordinal(),
+                num_replicas=xm.xrt_world_size())
 
     # return the DataLoader object
     return DataLoader(
