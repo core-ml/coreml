@@ -5,7 +5,8 @@ from torch.utils.data import Dataset
 from numpy.testing import assert_array_equal
 from coreml.data.vision.image import Image
 from coreml.data.transforms import ClassificationAnnotationTransform
-from coreml.data.sampler import DataSampler, ClassificationDataSampler
+from coreml.data.sampler import DataSampler, ClassificationDataSampler, \
+    RandomSampler
 
 
 class DummyDataset(Dataset):
@@ -69,6 +70,20 @@ class DataSamplerTestCase(unittest.TestCase):
         # with shuffle=True, the ordering should be different from the
         # default ordering
         self.assertNotEqual(indices, true_indices)
+
+
+class RandomSamplerTestCase(unittest.TestCase):
+    """Class to run tests on RandomSampler"""
+    @classmethod
+    def setUpClass(cls):
+        cls.dataset = DummyDataset()
+
+    def test_random(self):
+        """Test random sampling"""
+        sampler = RandomSampler(
+            self.dataset)
+        indices = list(sampler)
+        self.assertEqual(len(indices), 10)
 
 
 class ClassificationDataSamplerTestCase(unittest.TestCase):

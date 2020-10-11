@@ -123,8 +123,8 @@ class ClassificationDataSampler(DataSampler):
 
     @staticmethod
     def _check_params(data_source, shuffle, target_transform, mode):
-        assert mode in ['default', 'balanced']
-        if mode == 'default':
+        assert mode in ['default', 'balanced', 'random']
+        if mode in ['default', 'random']:
             return
 
         assert isinstance(data_source.items[0].label, dict)
