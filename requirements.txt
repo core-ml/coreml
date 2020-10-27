@@ -31,7 +31,7 @@ configparser==5.0.0
 coreml==0.0.9
 coverage==5.0
 CProfileV==1.0.7
-cryptography==2.8
+cryptography==3.2
 cycler==0.10.0
 cymem==2.0.3
 Cython==0.28.4
