@@ -23,7 +23,7 @@ setuptools.setup(
         'natsort==7.0.1',
         'opencv-python',
         'pandas==1.0.3',
-        'Pillow==7.1.1',
+        'Pillow==8.1.1',
         'PyYAML>=5.1',
         'scikit-learn==0.22.2.post1',
         'termcolor==1.1.0',
