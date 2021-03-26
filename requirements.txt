@@ -177,7 +177,7 @@ pytools==2019.1.1
 pytorch-transformers==1.1.0
 pytz==2019.3
 PyWavelets==1.1.1
-PyYAML==5.2
+PyYAML==5.4
 pyzmq==19.0.0
 regex==2018.1.10
 requests==2.23.0
