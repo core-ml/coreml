@@ -159,7 +159,7 @@ pycparser==2.20
 pycuda==2019.1.2
 pydot==1.4.1
 pyflakes==2.1.1
-Pygments==2.6.1
+Pygments==2.7.4
 pynvx==1.0.0
 pyOpenSSL==19.1.0
 pyparsing==2.4.7
