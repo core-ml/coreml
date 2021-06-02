@@ -241,7 +241,7 @@ typing==3.7.4.1
 typing-extensions==3.7.4.1
 ujson==1.35
 Unidecode==1.1.1
-urllib3==1.25.8
+urllib3==1.26.5
 voila==0.1.21
 wandb==0.9.4
 wasabi==0.6.0
