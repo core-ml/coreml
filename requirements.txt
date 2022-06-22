@@ -119,7 +119,7 @@ nose==1.3.7
 notebook==6.0.2
 numba==0.43.1
 numexpr==2.7.1
-numpy==1.18.2
+numpy==1.22.0
 nvidia-dali==0.17.0
 nvidia-ml-py3==7.352.0
 oauthlib==3.1.0
