@@ -23,7 +23,7 @@ certifi==2020.4.5.1
 cffi==1.14.0
 chardet==3.0.4
 Click==7.0
-codecov==2.0.15
+codecov==2.0.16
 conda==4.8.0
 conda-build==3.18.11
 conda-package-handling==1.6.0
