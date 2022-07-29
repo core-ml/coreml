@@ -101,7 +101,7 @@ maskrcnn-benchmark==0.1
 matplotlib==3.2.1
 mbstrdecoder==0.8.1
 mccabe==0.6.1
-mistune==0.8.4
+mistune==2.0.3
 mlperf-compliance==0.0.10
 mock==3.0.5
 more-itertools==8.0.2
