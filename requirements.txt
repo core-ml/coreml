@@ -91,7 +91,7 @@ kiwisolver==1.2.0
 kornia==0.4.0
 libarchive-c==2.8
 librosa==0.7.2
-lief==0.9.0
+lief==0.12.1
 llvmlite==0.28.0
 lmdb==0.98
 Mako==1.1.0
